@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+@Observable @MainActor
+final class AppState {
+  var selectedAccount: Account? = nil
+  var payments: [Payment] = []
+}
+
 @main
 struct PaymentArchiveMVVMApp: App {
   var body: some Scene {
