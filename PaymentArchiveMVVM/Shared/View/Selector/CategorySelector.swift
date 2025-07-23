@@ -10,7 +10,7 @@ import SwiftUI
 struct CategorySelector: View {
   @Binding var selectedCategory: Payment.Category?
   let categories: [Payment.Category]
-  //let colors: EditPaymentColors.HorizontalSelector
+  let colors: Colors
 
   var body: some View {
     ScrollView(.horizontal, showsIndicators: true) {
@@ -22,27 +22,31 @@ struct CategorySelector: View {
             VStack {
               CategoryIcon(
                 iconSystemName: category.symbolName,
-                side: 20
+                side: 20,
+                colors: colors.categoryIcon
               )
               Text(category.name)
                 .font(.caption)
-                //.foregroundStyle(colors.title)
-                .foregroundStyle(.black)
+                .foregroundStyle(colors.categoryTitle)
                 .lineLimit(2)
             }
             .padding(8)
-            //.background(colors.background)
-            .background(.gray)
+            .background(colors.categoryBackground)
             .cornerRadius(12)
           }
           .overlay(
             RoundedRectangle(cornerRadius: 12)
-              //.stroke(selectedCategory == item ? colors.iconBorder : Color.clear, lineWidth: 2)
-              .stroke(selectedCategory == category ? .yellow : .clear, lineWidth: 4)
+              .stroke(
+                selectedCategory == category ?
+                colors.selectedCategoryBorder :
+                .clear,
+                lineWidth: 4
+              )
           )
         }
       }
       .padding(.horizontal)
+      .background(colors.background)
       // Need bottom and top padding so that buttons are not clipped when highlighted or when scrolled
       .padding(.bottom, 16)
       .padding(.top, 8)
@@ -50,10 +54,30 @@ struct CategorySelector: View {
   }
 }
 
+extension CategorySelector {
+  struct Colors: Sendable {
+    let categoryIcon: CategoryIcon.Colors
+    let categoryTitle: Color
+    let categoryBackground: Color
+    let selectedCategoryBorder: Color
+    let background: Color
+  }
+}
+
 #Preview {
   @Previewable @State var selectedCategory: Payment.Category? = nil
   CategorySelector(
     selectedCategory: $selectedCategory,
-    categories: Payment.Category.allCases
+    categories: Payment.Category.allCases,
+    colors: .init(
+      categoryIcon: .init(
+        iconBackground: .blue,
+        iconTint: .white
+      ),
+      categoryTitle: .black,
+      categoryBackground: .gray,
+      selectedCategoryBorder: .yellow,
+      background: .green
+    )
   )
 }

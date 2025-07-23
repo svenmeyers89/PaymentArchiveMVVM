@@ -8,23 +8,31 @@
 import SwiftUI
 
 struct CategoryIcon: View {
+  struct Colors: Sendable {
+    let iconBackground: Color
+    let iconTint: Color
+  }
+  
   let iconSystemName: String
   let side: CGFloat
+  let colors: Colors
   
   var body: some View {
     Image(systemName: iconSystemName)
       .resizable() // makes the image respect frame
       .scaledToFit() // prevents distortion
       .frame(width: side, height: side) // fixed icon size
-      //.foregroundColor(colors.categoryIcon)
-      .foregroundColor(.white)
+      .foregroundColor(colors.iconTint)
       .padding(8) // internal padding
-      //.background(colors.categoryBackground)
-      .background(.blue)
+      .background(colors.iconBackground)
       .clipShape(Circle())
   }
 }
 
 #Preview {
-  CategoryIcon(iconSystemName: "plus.circle", side: 32)
+  CategoryIcon(
+    iconSystemName: "plus.circle",
+    side: 32,
+    colors: .init(iconBackground: Color(#colorLiteral(red: 0.2745098174, green: 0.4862745106, blue: 0.1411764771, alpha: 1)), iconTint: .white)
+  )
 }

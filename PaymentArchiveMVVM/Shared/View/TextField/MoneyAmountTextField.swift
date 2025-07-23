@@ -10,13 +10,13 @@ import SwiftUI
 struct MoneyAmountTextField: View {
   @Binding var amount: String
   let currency: String
-  //let colors: EditPaymentColors.TextBox
+  let colors: Colors
   
   var body: some View {
     VStack(alignment: .leading) {
       Text("Add the payment amount")
         .font(.title2)
-        //.foregroundStyle(colors.title)
+        .foregroundStyle(colors.title)
       
       HStack(spacing: 12) {
         TextField(
@@ -25,13 +25,23 @@ struct MoneyAmountTextField: View {
         )
         .textFieldStyle(RoundedBorderTextFieldStyle())
         .keyboardType(.decimalPad)
-        //.foregroundStyle(.headline)
+        .foregroundStyle(colors.textField)
 
         Text(currency)
           .font(.headline)
-          //.foregroundStyle(colors.currencyTitle)
+          .foregroundStyle(colors.currency)
       }
     }
+    .background(colors.background)
+  }
+}
+
+extension MoneyAmountTextField {
+  struct Colors {
+    let background: Color
+    let title: Color
+    let textField: Color
+    let currency: Color
   }
 }
 
@@ -39,6 +49,12 @@ struct MoneyAmountTextField: View {
   @Previewable @State var amount: String = ""
   MoneyAmountTextField(
     amount: $amount,
-    currency: "EUR"
+    currency: "EUR",
+    colors: .init(
+      background: .green,
+      title: .black,
+      textField: .orange,
+      currency: .black
+    )
   )
 }
