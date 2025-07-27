@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-protocol EditPaymentDataManager {
+protocol EditPaymentDataManager: Sendable {
   func save(payment: Payment) async throws
 }
 
@@ -16,18 +16,18 @@ final class EditPaymentState {
   var colors: EditPaymentView.Colors
 
   let edittedPayment: Payment?
-  let currency: String
+  let selectedAccount: Account
   let categories: [Payment.Category]
   
   init(
     colors: EditPaymentView.Colors,
     edittedPayment: Payment?,
-    currency: String,
+    selectedAccount: Account,
     categories: [Payment.Category]
   ) {
     self.colors = colors
     self.edittedPayment = edittedPayment
-    self.currency = currency
+    self.selectedAccount = selectedAccount
     self.categories = categories
   }
 }

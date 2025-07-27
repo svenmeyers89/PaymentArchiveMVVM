@@ -14,6 +14,8 @@ struct EditPaymentView: View {
   @State private var amount: String
   @State private var category: Payment.Category?
   @State private var note: String?
+  
+  @State private var isActionInProgress: Bool = false
 
   init(
     state: EditPaymentState,
@@ -41,7 +43,7 @@ struct EditPaymentView: View {
       
       MoneyAmountTextField(
         amount: $amount,
-        currency: state.currency,
+        currency: state.selectedAccount.currency,
         colors: state.colors.moneyAmountTextField
       )
       .padding(.bottom, 16)
@@ -55,11 +57,27 @@ struct EditPaymentView: View {
       .fixedSize(horizontal: false, vertical: true)
       
       Button("Save") {
-        print(
-          "Saved: amount: \(self.amount), category: \(self.category?.rawValue ?? "no category")"
-        )
+        Task {
+          isActionInProgress = true
+          let result = await viewModel
+            .savePayment(
+              amountString: amount,
+              category: category,
+              note: note,
+              selectedAccount: state.selectedAccount,
+              edittedPayment: state.edittedPayment
+            )
+          switch result {
+          case .success:
+            print("success!")
+          case .failure(let error):
+            print("error: \(error)")
+          }
+          isActionInProgress = false
+        }
       }
       .padding(.bottom, 32)
+      .disabled(isActionInProgress)
 
       Button("Cancel") {
         print("Canceled!")
@@ -104,7 +122,11 @@ extension EditPaymentView {
         )
       ),
       edittedPayment: nil,
-      currency: "$",
+      selectedAccount: Account(
+        name: "Perica",
+        paymentIds: ["1", "2", "3"],
+        currency: "$"
+      ),
       categories: Payment.Category.allCases
     ),
     viewModel: EditPaymentViewModel(dataManager: MockedDataStore())
@@ -114,7 +136,7 @@ extension EditPaymentView {
 fileprivate struct MockedDataStore: EditPaymentDataManager {
   func save(payment: Payment) async throws {
     print("Saving...")
-    try await Task.sleep(nanoseconds: 1_000_000)
+    try await Task.sleep(nanoseconds: 3_000_000_000)
     print("Saved!")
   }
 }
