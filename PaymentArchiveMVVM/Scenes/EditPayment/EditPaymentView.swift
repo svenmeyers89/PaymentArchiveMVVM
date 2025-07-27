@@ -40,7 +40,7 @@ struct EditPaymentView: View {
   var body: some View {
     VStack {
       Spacer()
-      
+      // temp
       MoneyAmountTextField(
         amount: $amount,
         currency: state.selectedAccount.currency,
