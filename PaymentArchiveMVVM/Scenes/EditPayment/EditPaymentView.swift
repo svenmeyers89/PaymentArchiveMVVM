@@ -16,6 +16,7 @@ struct EditPaymentView: View {
   @State private var note: String?
   
   @State private var isActionInProgress: Bool = false
+  @State private var toastMessage: ToastBar.Message? = nil
 
   init(
     state: EditPaymentState,
@@ -38,55 +39,65 @@ struct EditPaymentView: View {
   }
 
   var body: some View {
-    VStack {
-      Spacer()
-      // temp
-      MoneyAmountTextField(
-        amount: $amount,
-        currency: state.selectedAccount.currency,
-        colors: state.colors.moneyAmountTextField
-      )
-      .padding(.bottom, 16)
-      
-      CategorySelector(
-        selectedCategory: $category,
-        categories: state.categories,
-        colors: state.colors.categorySelector
-      )
-      .padding(.bottom, 16)
-      .fixedSize(horizontal: false, vertical: true)
-      
-      Button("Save") {
-        Task {
-          isActionInProgress = true
-          let result = await viewModel
-            .savePayment(
-              amountString: amount,
-              category: category,
-              note: note,
-              selectedAccount: state.selectedAccount,
-              edittedPayment: state.edittedPayment
-            )
-          switch result {
-          case .success:
-            print("success!")
-          case .failure(let error):
-            print("error: \(error)")
+    ToastContainer(
+      toastBarMessage: $toastMessage,
+      duration: 3,
+      content: {
+        VStack {
+          Spacer()
+          
+          MoneyAmountTextField(
+            amount: $amount,
+            currency: state.selectedAccount.currency,
+            colors: state.colors.moneyAmountTextField
+          )
+          .padding(.bottom, 16)
+          
+          CategorySelector(
+            selectedCategory: $category,
+            categories: state.categories,
+            colors: state.colors.categorySelector
+          )
+          .padding(.bottom, 16)
+          .fixedSize(horizontal: false, vertical: true)
+          
+          Button("Save") {
+            Task {
+              isActionInProgress = true
+              let result = await viewModel
+                .savePayment(
+                  amountString: amount,
+                  category: category,
+                  note: note,
+                  selectedAccount: state.selectedAccount,
+                  edittedPayment: state.edittedPayment
+                )
+              switch result {
+              case .success:
+                print("success!")
+              case .failure(let error):
+                self.toastMessage = error.toastBarMessage
+                print("error: \(error)")
+              }
+              isActionInProgress = false
+            }
           }
-          isActionInProgress = false
+          .padding(.bottom, 32)
+          .disabled(isActionInProgress)
+          
+          Button("Cancel") {
+            print("Canceled!")
+          }
+          
+          Spacer()
         }
+        .padding(.horizontal, 24)
+        .background(state.colors.background)
+      },
+      completion: {
+        self.toastMessage = nil
       }
-      .padding(.bottom, 32)
-      .disabled(isActionInProgress)
-
-      Button("Cancel") {
-        print("Canceled!")
-      }
-      
-      Spacer()
-    }
-    .padding(.horizontal, 24)
-    .background(state.colors.background)
+    )
   }
 }
 

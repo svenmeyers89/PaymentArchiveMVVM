@@ -11,6 +11,26 @@ enum EditPaymentError: Error {
   case invalidMoneyAmountFormat
   case categoryEmpty
   case savePaymentFailed(Error)
+  
+  var toastBarMessage: ToastBar.Message {
+    switch self {
+    case .invalidMoneyAmountFormat:
+      return .init(
+        text: "Something went wrong",
+        type: .error
+      )
+    case .categoryEmpty:
+      return .init(
+        text: "Please select category",
+        type: .error
+      )
+    case .savePaymentFailed(let underlyingError):
+      return .init(
+        text: "Saving payment failed: \(underlyingError.localizedDescription)",
+        type: .error
+      )
+    }
+  }
 }
 
 @MainActor
