@@ -8,15 +8,15 @@
 import Foundation
 
 enum EditPaymentError: Error {
-  case invalidMoneyAmountFormat
+  case moneyAmountCannotBeEmptyOrZero
   case categoryEmpty
   case savePaymentFailed(Error)
   
   var toastBarMessage: ToastBar.Message {
     switch self {
-    case .invalidMoneyAmountFormat:
+    case .moneyAmountCannotBeEmptyOrZero:
       return .init(
-        text: "Something went wrong",
+        text: "Please enter non-trivial money amount",
         type: .error
       )
     case .categoryEmpty:
@@ -42,14 +42,14 @@ final class EditPaymentViewModel {
   }
   
   func savePayment(
-    amountString: String,
+    amount: Float?,
     category: Payment.Category?,
     note: String?,
     selectedAccount: Account,
     edittedPayment: Payment?
   ) async -> Result<Void, EditPaymentError> {
-    guard let amount = NumberFormatter().number(from: amountString)?.floatValue else {
-      return .failure(.invalidMoneyAmountFormat)
+    guard let amount, amount > 0.0 else {
+      return .failure(.moneyAmountCannotBeEmptyOrZero)
     }
     guard let category else {
       return .failure(.categoryEmpty)

@@ -11,7 +11,7 @@ struct EditPaymentView: View {
   private let state: EditPaymentState
   /*@StateObject*/ private var viewModel: EditPaymentViewModel
   
-  @State private var amount: String
+  @State private var amount: Float?
   @State private var category: Payment.Category?
   @State private var note: String?
   
@@ -25,13 +25,7 @@ struct EditPaymentView: View {
     //_viewModel = StateObject(wrappedValue: viewModel())
     self.state = state
 
-    let amount: String = {
-      guard let amount = state.edittedPayment?.amount else {
-        return ""
-      }
-      return String(format: "%.2f", amount)
-    }()
-    self.amount = amount
+    self.amount = state.edittedPayment?.amount
     self.category = state.edittedPayment?.category
     self.note = state.edittedPayment?.note
 
@@ -48,6 +42,7 @@ struct EditPaymentView: View {
           
           MoneyAmountTextField(
             amount: $amount,
+            locale: AppDependency.locale,
             currency: state.selectedAccount.currency,
             colors: state.colors.moneyAmountTextField
           )
@@ -66,7 +61,7 @@ struct EditPaymentView: View {
               isActionInProgress = true
               let result = await viewModel
                 .savePayment(
-                  amountString: amount,
+                  amount: amount,
                   category: category,
                   note: note,
                   selectedAccount: state.selectedAccount,

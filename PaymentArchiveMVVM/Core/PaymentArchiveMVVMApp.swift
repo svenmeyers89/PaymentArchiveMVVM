@@ -13,6 +13,10 @@ final class AppState {
   var payments: [Payment] = []
 }
 
+enum AppDependency {
+  static let locale = Locale.current
+}
+
 @main
 struct PaymentArchiveMVVMApp: App {
   var body: some Scene {
