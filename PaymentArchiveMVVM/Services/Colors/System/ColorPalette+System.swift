@@ -1,0 +1,37 @@
+//
+//  ColorPalette+System.swift
+//  PaymentArchiveMVVM
+//
+//  Created by Sven Majeric on 06.08.2025..
+//
+
+import SwiftUI
+
+extension ColorPalette {
+  static let system: ColorPalette = ColorPalette(
+    background: .init(
+      primary: Color(.systemBackground),
+      header: Color(.systemGroupedBackground),
+      box: Color(.secondarySystemGroupedBackground)
+    ),
+    text: .init(
+      primary: .primary,
+      secondary: .secondary,
+      buttonTitle: .accentColor,
+      caption: Color(.tertiaryLabel)
+    ),
+    highlight: .init(
+      tint: .blue,
+      icon: .white,
+      title: .white
+    ),
+    selector: .init(
+      title: .blue,
+      background: Color(.blue).opacity(0.1),
+      border: .blue
+    ),
+    activityIndicator: .init(
+      tint: .gray
+    )
+  )
+}
