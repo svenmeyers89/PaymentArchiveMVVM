@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PersistenceStore {
+protocol PersistenceStore: Sendable {
   func loadAllAccounts() async throws -> [Account]
   func loadPayments(accountId: String) async throws -> [Payment]
   func saveAccount(_ account: Account) async throws

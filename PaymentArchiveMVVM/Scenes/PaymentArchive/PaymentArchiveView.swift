@@ -8,43 +8,60 @@
 import SwiftUI
 
 @MainActor @Observable
-final class PaymentArchiveState {
-  var colorPalette: ColorPalette
-
-  init(colorPalette: ColorPalette) {
-    self.colorPalette = colorPalette
+final class PaymentArchiveViewModel {
+  private(set) var appState: AppState
+  
+  init(appState: AppState) {
+    self.appState = appState
   }
+  
+  var colors: PaymentArchiveView.Colors {
+    appState.colorPalette.paymentArchiveViewColors
+  }
+}
 
-  fileprivate var colors: PaymentArchiveView.Colors {
+extension ColorPalette {
+  var paymentArchiveViewColors: PaymentArchiveView.Colors {
     .init(
-      background: colorPalette.background.primary,
-      buttonTitle: colorPalette.text.buttonTitle
+      background: background.primary,
+      buttonTitle: text.buttonTitle
     )
   }
 }
 
 struct PaymentArchiveView: View {
-  let state: PaymentArchiveState
+  private var viewModel: PaymentArchiveViewModel
   
+  @State
+  private var isChangeThemeModalPresented: Bool = false
+  
+  init(
+    viewModel: @autoclosure @escaping () -> PaymentArchiveViewModel
+  ) {
+    self.viewModel = viewModel()
+  }
+
   var body: some View {
     Group {
       VStack(spacing: 12) {
         Button("New payment") {
           
         }
-        .foregroundStyle(state.colors.buttonTitle)
+        .foregroundStyle(viewModel.colors.buttonTitle)
         Button("Change theme") {
-          if state.colorPalette == .system {
-            state.colorPalette = .custom
-          } else {
-            state.colorPalette = .system
-          }
+          //viewModel.changeTheme()
+          isChangeThemeModalPresented = true
         }
-        .foregroundStyle(state.colors.buttonTitle)
+        .foregroundStyle(viewModel.colors.buttonTitle)
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(state.colors.background)
+    .background(viewModel.colors.background)
+    .sheet(
+      isPresented: $isChangeThemeModalPresented) {
+        let viewModel = ChangeThemeViewModel(appState: self.viewModel.appState)
+        ChangeThemeView(viewModel: viewModel)
+      }
   }
 }
 
@@ -56,5 +73,6 @@ extension PaymentArchiveView {
 }
 
 #Preview {
-  PaymentArchiveView(state: PaymentArchiveState(colorPalette: .system))
+  @Previewable @State var appState: AppState = .init()
+  PaymentArchiveView(viewModel: .init(appState: appState))
 }

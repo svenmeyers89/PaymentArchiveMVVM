@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct EditPaymentView: View {
-  private let state: EditPaymentState
-  /*@StateObject*/ private var viewModel: EditPaymentViewModel
+  private var viewModel: EditPaymentViewModel
   
   @State private var amount: Float?
   @State private var category: Payment.Category?
@@ -19,17 +18,12 @@ struct EditPaymentView: View {
   @State private var toastMessage: ToastBar.Message? = nil
 
   init(
-    state: EditPaymentState,
     viewModel: @autoclosure @escaping () -> EditPaymentViewModel
   ) {
-    //_viewModel = StateObject(wrappedValue: viewModel())
-    self.state = state
-
-    self.amount = state.edittedPayment?.amount
-    self.category = state.edittedPayment?.category
-    self.note = state.edittedPayment?.note
-
     self.viewModel = viewModel()
+    self.amount = viewModel().state.edittedPayment?.amount
+    self.category = viewModel().state.edittedPayment?.category
+    self.note = viewModel().state.edittedPayment?.note
   }
 
   var body: some View {
@@ -43,15 +37,15 @@ struct EditPaymentView: View {
           MoneyAmountTextField(
             amount: $amount,
             locale: AppDependency.locale,
-            currency: state.selectedAccount.currency,
-            colors: state.colors.moneyAmountTextField
+            currency: viewModel.state.selectedAccount.currency,
+            colors: viewModel.state.colors.moneyAmountTextField
           )
           .padding(.bottom, 16)
           
           CategorySelector(
             selectedCategory: $category,
-            categories: state.categories,
-            colors: state.colors.categorySelector
+            categories: viewModel.state.categories,
+            colors: viewModel.state.colors.categorySelector
           )
           .padding(.bottom, 16)
           .fixedSize(horizontal: false, vertical: true)
@@ -63,9 +57,7 @@ struct EditPaymentView: View {
                 .savePayment(
                   amount: amount,
                   category: category,
-                  note: note,
-                  selectedAccount: state.selectedAccount,
-                  edittedPayment: state.edittedPayment
+                  note: note
                 )
               switch result {
               case .success:
@@ -87,7 +79,7 @@ struct EditPaymentView: View {
           Spacer()
         }
         .padding(.horizontal, 24)
-        .background(state.colors.background)
+        .background(viewModel.state.colors.background)
       },
       completion: {
         self.toastMessage = nil
@@ -107,35 +99,37 @@ extension EditPaymentView {
 
 #Preview {
   EditPaymentView(
-    state: .init(
-      colors: .init(
-        background: .yellow,
-        moneyAmountTextField: .init(
-          background: .green,
-          title: .black,
-          textField: .orange,
-          currency: .black
-        ),
-        categorySelector: .init(
-          categoryIcon: .init(
-            iconBackground: .green,
-            iconTint: .white
+    viewModel: EditPaymentViewModel(
+      initialState: .init(
+        colors: .init(
+          background: .yellow,
+          moneyAmountTextField: .init(
+            background: .green,
+            title: .black,
+            textField: .orange,
+            currency: .black
           ),
-          categoryTitle: .purple,
-          categoryBackground: .gray,
-          selectedCategoryBorder: .blue,
-          background: .brown
-        )
+          categorySelector: .init(
+            categoryIcon: .init(
+              iconBackground: .green,
+              iconTint: .white
+            ),
+            categoryTitle: .purple,
+            categoryBackground: .gray,
+            selectedCategoryBorder: .blue,
+            background: .brown
+          )
+        ),
+        edittedPayment: nil,
+        selectedAccount: Account(
+          name: "Perica",
+          paymentIds: ["1", "2", "3"],
+          currency: "$"
+        ),
+        categories: Payment.Category.allCases
       ),
-      edittedPayment: nil,
-      selectedAccount: Account(
-        name: "Perica",
-        paymentIds: ["1", "2", "3"],
-        currency: "$"
-      ),
-      categories: Payment.Category.allCases
-    ),
-    viewModel: EditPaymentViewModel(dataManager: MockedDataStore())
+      dataManager: MockedDataStore()
+    )
   )
 }
 

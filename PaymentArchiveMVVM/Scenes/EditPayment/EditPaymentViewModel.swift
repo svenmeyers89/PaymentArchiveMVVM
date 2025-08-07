@@ -33,20 +33,24 @@ enum EditPaymentError: Error {
   }
 }
 
-@MainActor
+@MainActor @Observable
 final class EditPaymentViewModel {
+  private(set) var state: EditPaymentState
+
   nonisolated private let dataManager: EditPaymentDataManager
-  
-  init(dataManager: EditPaymentDataManager) {
+
+  init(
+    initialState: EditPaymentState,
+    dataManager: EditPaymentDataManager
+  ) {
+    self.state = initialState
     self.dataManager = dataManager
   }
   
   func savePayment(
     amount: Float?,
     category: Payment.Category?,
-    note: String?,
-    selectedAccount: Account,
-    edittedPayment: Payment?
+    note: String?
   ) async -> Result<Void, EditPaymentError> {
     guard let amount, amount > 0.0 else {
       return .failure(.moneyAmountCannotBeEmptyOrZero)
@@ -55,13 +59,13 @@ final class EditPaymentViewModel {
       return .failure(.categoryEmpty)
     }
     let updatedPayment: Payment = {
-      if let edittedPayment {
+      if let edittedPayment = state.edittedPayment {
         let updatedPayment = edittedPayment
           .updated(amount: amount, category: category, note: note)
         return updatedPayment
       } else {
         return .init(
-          accountId: selectedAccount.id,
+          accountId: state.selectedAccount.id,
           amount: amount,
           category: category,
           note: note
