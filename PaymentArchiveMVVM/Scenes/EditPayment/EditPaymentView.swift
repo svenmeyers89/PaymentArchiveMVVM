@@ -124,7 +124,8 @@ extension EditPaymentView {
         selectedAccount: Account(
           name: "Perica",
           paymentIds: ["1", "2", "3"],
-          currency: "$"
+          currency: "$",
+          useBiometry: false
         ),
         categories: Payment.Category.allCases
       ),

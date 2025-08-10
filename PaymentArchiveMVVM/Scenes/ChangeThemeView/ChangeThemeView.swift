@@ -12,6 +12,7 @@ final class ChangeThemeViewModel {
   private(set) var appState: AppState
   
   init(appState: AppState) {
+    print("init ChangeThemeViewModel")
     self.appState = appState
   }
 

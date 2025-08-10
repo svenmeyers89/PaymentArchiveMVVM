@@ -33,7 +33,8 @@ extension SimplifiedDataStore {
     let account1 = Account(
       id: account1Id, name: "Perica's account",
       paymentIds: paymentTimestamps,
-      currency: currency
+      currency: currency,
+      useBiometry: false
     )
     let payments = paymentTimestamps
       .map {

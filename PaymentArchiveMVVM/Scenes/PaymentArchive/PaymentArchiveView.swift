@@ -12,6 +12,7 @@ final class PaymentArchiveViewModel {
   private(set) var appState: AppState
   
   init(appState: AppState) {
+    print("init PaymentArchiveViewModel")
     self.appState = appState
   }
   
