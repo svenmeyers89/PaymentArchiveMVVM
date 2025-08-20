@@ -12,7 +12,6 @@ protocol EditPaymentDataManager: Sendable {
 }
 
 struct EditPaymentState: Sendable {
-  let colors: EditPaymentView.Colors
   let edittedPayment: Payment?
   let selectedAccount: Account
   let categories: [Payment.Category]

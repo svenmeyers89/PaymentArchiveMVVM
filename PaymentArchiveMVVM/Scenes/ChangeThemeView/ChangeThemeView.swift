@@ -16,7 +16,7 @@ final class ChangeThemeViewModel {
     self.appState = appState
   }
 
-  func changeTheme(_ theme: Theme) {
+  func changeTheme(_ theme: Kurcina) {
     switch theme {
     case .system:
       appState.colorPalette = ColorPalette.system
@@ -26,7 +26,7 @@ final class ChangeThemeViewModel {
   }
 }
 
-enum Theme: String, Equatable, CaseIterable {
+enum Kurcina: String, Equatable, CaseIterable {
   case system
   case custom
 }
@@ -41,7 +41,7 @@ struct ChangeThemeView: View {
   var body: some View {
     let colors = viewModel.appState.colorPalette.changeThemeViewColors
     
-    ForEach(Theme.allCases, id: \.self) { theme in
+    ForEach(Kurcina.allCases, id: \.self) { theme in
       Button(
         action: {
           viewModel.changeTheme(theme)
@@ -94,7 +94,7 @@ extension ColorPalette {
 }
 
 fileprivate extension ColorPalette {
-  var selectedTheme: Theme {
+  var selectedTheme: Kurcina {
     self == ColorPalette.system ? .system : .custom
   }
 }

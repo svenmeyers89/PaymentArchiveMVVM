@@ -19,11 +19,26 @@ enum AppDependency {
   static let persistenceController: PersistenceStore = SimplifiedDataStore.singleAccountWithMultiplePayments
 }
 
+struct UserDefaultsKeys {
+  static let selectedThemeID = "SelectedThemeID"
+}
+
 @main
 struct PaymentArchiveMVVMApp: App {
+  @AppStorage(UserDefaultsKeys.selectedThemeID) private var selectedThemeID: String = Theme.defaultValue.rawValue
+
   var body: some Scene {
     WindowGroup {
-      ContentView()
+      PaymentArchiveView(
+        viewModel: .init(
+          appState: AppState(),
+          persistenceStore: SimplifiedDataStore.singleAccountWithMultiplePayments
+        )
+      )
+      .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
+      .environment(\.setTheme) { newTheme in
+        selectedThemeID = newTheme.rawValue
+      }
     }
   }
 }

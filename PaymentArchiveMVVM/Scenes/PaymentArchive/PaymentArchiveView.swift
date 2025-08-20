@@ -9,15 +9,43 @@ import SwiftUI
 
 @MainActor @Observable
 final class PaymentArchiveViewModel {
-  private(set) var appState: AppState
+  enum ContentType {
+    case loading
+    case onboarding
+    case listView([Payment])
+    case error(message: String)
+  }
   
-  init(appState: AppState) {
-    print("init PaymentArchiveViewModel")
+  private(set) var appState: AppState
+  private(set) var contentType: ContentType?
+
+  private let persistenceStore: PersistenceStore
+  
+  init(
+    appState: AppState,
+    persistenceStore: PersistenceStore
+  ) {
     self.appState = appState
+    self.persistenceStore = persistenceStore
   }
   
   var colors: PaymentArchiveView.Colors {
     appState.colorPalette.paymentArchiveViewColors
+  }
+  
+  func loadContent() async {
+    do {
+      self.contentType = .loading
+      guard let account = try await persistenceStore.loadAllAccounts().first else {
+        self.contentType = .onboarding
+        return
+      }
+      let payments = try await persistenceStore.loadPayments(accountId: account.id)
+      self.contentType = .listView(payments)
+    } catch {
+      let error = (error as NSError).localizedDescription
+      self.contentType = .error(message: error)
+    }
   }
 }
 
@@ -59,10 +87,16 @@ struct PaymentArchiveView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(viewModel.colors.background)
     .sheet(
-      isPresented: $isChangeThemeModalPresented) {
-        let viewModel = ChangeThemeViewModel(appState: self.viewModel.appState)
-        ChangeThemeView(viewModel: viewModel)
+      isPresented: $isChangeThemeModalPresented
+    ) {
+      let viewModel = ChangeThemeViewModel(appState: self.viewModel.appState)
+      ChangeThemeView(viewModel: viewModel)
+    }
+    .onAppear {
+      Task {
+        await viewModel.loadContent()
       }
+    }
   }
 }
 
@@ -75,5 +109,10 @@ extension PaymentArchiveView {
 
 #Preview {
   @Previewable @State var appState: AppState = .init()
-  PaymentArchiveView(viewModel: .init(appState: appState))
+  PaymentArchiveView(
+    viewModel: .init(
+      appState: appState,
+      persistenceStore: SimplifiedDataStore.empty
+    )
+  )
 }

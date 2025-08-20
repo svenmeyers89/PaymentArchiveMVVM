@@ -70,4 +70,21 @@ extension EmptyView.Configuration {
       ]
     )
   }
+  
+  static func error(
+    message: String,
+    refreshAction: @Sendable @escaping () -> Void
+  ) -> Self {
+    .init(
+      title: "Oops, something went wrong",
+      description: message,
+      iconName: "exclamationmark.triangle.fill",
+      buttons: [
+        .init(
+          title: "Refresh",
+          action: refreshAction
+        )
+      ]
+    )
+  }
 }

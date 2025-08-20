@@ -11,26 +11,25 @@ struct MoneyAmountTextField: View {
   @Binding var amount: Float?
   let currency: String
   let colors: Colors
-  
+
+  @Environment(\.locale) private var locale
   @State private var cents: Int
   private let formatter: NumberFormatter = .init()
   
   init(
     amount: Binding<Float?>,
-    locale: Locale,
     currency: String,
     colors: Colors
   ) {
     self._amount = amount
     self.currency = currency
     self.colors = colors
-
+    self.cents = Int((amount.wrappedValue ?? 0) * 100.0)
+    
     formatter.numberStyle = .decimal
     formatter.minimumFractionDigits = 2
     formatter.maximumFractionDigits = 2
     formatter.locale = locale
-
-    self.cents = Int((amount.wrappedValue ?? 0) * 100.0)
   }
   
   var body: some View {
@@ -100,7 +99,6 @@ extension MoneyAmountTextField {
   @Previewable @State var amount: Float? = nil
   MoneyAmountTextField(
     amount: $amount,
-    locale: AppDependency.locale,
     currency: "EUR",
     colors: .init(
       background: .green,

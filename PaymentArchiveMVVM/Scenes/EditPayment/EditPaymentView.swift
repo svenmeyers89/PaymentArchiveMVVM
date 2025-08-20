@@ -17,6 +17,8 @@ struct EditPaymentView: View {
   @State private var isActionInProgress: Bool = false
   @State private var toastMessage: ToastBar.Message? = nil
 
+  @Environment(\.theme) var theme
+
   init(
     viewModel: @autoclosure @escaping () -> EditPaymentViewModel
   ) {
@@ -36,16 +38,15 @@ struct EditPaymentView: View {
           
           MoneyAmountTextField(
             amount: $amount,
-            locale: AppDependency.locale,
             currency: viewModel.state.selectedAccount.currency,
-            colors: viewModel.state.colors.moneyAmountTextField
+            colors: moneyAmountTextFieldColors
           )
           .padding(.bottom, 16)
           
           CategorySelector(
             selectedCategory: $category,
             categories: viewModel.state.categories,
-            colors: viewModel.state.colors.categorySelector
+            colors: categorySelectorColors
           )
           .padding(.bottom, 16)
           .fixedSize(horizontal: false, vertical: true)
@@ -79,7 +80,7 @@ struct EditPaymentView: View {
           Spacer()
         }
         .padding(.horizontal, 24)
-        .background(viewModel.state.colors.background)
+        .background(backgroundColor)
       },
       completion: {
         self.toastMessage = nil
@@ -95,31 +96,38 @@ extension EditPaymentView {
     let categorySelector: CategorySelector.Colors
     // TODO: Add button colors
   }
+
+  var backgroundColor: Color {
+    theme.background.primary
+  }
+  
+  var moneyAmountTextFieldColors: MoneyAmountTextField.Colors {
+    .init(
+      background: theme.background.primary,
+      title: theme.text.primary,
+      textField: theme.text.secondary,
+      currency: theme.text.primary
+    )
+  }
+  
+  var categorySelectorColors: CategorySelector.Colors {
+    .init(
+      categoryIcon: .init(
+        iconBackground: theme.highlight.icon,
+        iconTint: theme.highlight.tint
+      ),
+      categoryTitle: theme.selector.title,
+      categoryBackground: theme.selector.background,
+      selectedCategoryBorder: theme.selector.border,
+      background: theme.background.primary
+    )
+  }
 }
 
 #Preview {
   EditPaymentView(
     viewModel: EditPaymentViewModel(
       initialState: .init(
-        colors: .init(
-          background: .yellow,
-          moneyAmountTextField: .init(
-            background: .green,
-            title: .black,
-            textField: .orange,
-            currency: .black
-          ),
-          categorySelector: .init(
-            categoryIcon: .init(
-              iconBackground: .green,
-              iconTint: .white
-            ),
-            categoryTitle: .purple,
-            categoryBackground: .gray,
-            selectedCategoryBorder: .blue,
-            background: .brown
-          )
-        ),
         edittedPayment: nil,
         selectedAccount: Account(
           name: "Perica",
@@ -132,6 +140,7 @@ extension EditPaymentView {
       dataManager: MockedDataStore()
     )
   )
+  .environment(\.theme, .system)
 }
 
 fileprivate struct MockedDataStore: EditPaymentDataManager {

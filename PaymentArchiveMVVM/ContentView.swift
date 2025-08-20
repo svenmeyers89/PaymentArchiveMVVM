@@ -9,13 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+          List {
+            PaymentView(
+              payment: .init(
+                accountId: "1",
+                amount: 12.5,
+                category: .accomodation
+              )
+            )
+          }
+          .listStyle(.insetGrouped)
     }
 }
 
