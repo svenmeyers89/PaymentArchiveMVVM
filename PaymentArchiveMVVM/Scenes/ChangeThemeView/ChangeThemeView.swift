@@ -7,64 +7,65 @@
 
 import SwiftUI
 
-@MainActor @Observable
-final class ChangeThemeViewModel {
-  private(set) var appState: AppState
-  
-  init(appState: AppState) {
-    print("init ChangeThemeViewModel")
-    self.appState = appState
-  }
-
-  func changeTheme(_ theme: Kurcina) {
-    switch theme {
-    case .system:
-      appState.colorPalette = ColorPalette.system
-    case .custom:
-      appState.colorPalette = ColorPalette.custom
-    }
-  }
-}
-
-enum Kurcina: String, Equatable, CaseIterable {
-  case system
-  case custom
-}
+//@MainActor @Observable
+//final class ChangeThemeViewModel {
+//  private(set) var appState: AppState
+//  
+//  init(appState: AppState) {
+//    print("init ChangeThemeViewModel")
+//    self.appState = appState
+//  }
+//
+//  func changeTheme(_ theme: Kurcina) {
+//    switch theme {
+//    case .system:
+//      appState.colorPalette = ColorPalette.system
+//    case .custom:
+//      appState.colorPalette = ColorPalette.custom
+//    }
+//  }
+//}
+//
+//enum Kurcina: String, Equatable, CaseIterable {
+//  case system
+//  case custom
+//}
 
 struct ChangeThemeView: View {
-  let viewModel: ChangeThemeViewModel
-  
-  var colors: ChangeThemeView.Colors {
-    viewModel.appState.colorPalette.changeThemeViewColors
-  }
+//  let viewModel: ChangeThemeViewModel
+//  
+//  var colors: ChangeThemeView.Colors {
+//    viewModel.appState.colorPalette.changeThemeViewColors
+//  }
   
   var body: some View {
-    let colors = viewModel.appState.colorPalette.changeThemeViewColors
-    
-    ForEach(Kurcina.allCases, id: \.self) { theme in
-      Button(
-        action: {
-          viewModel.changeTheme(theme)
-        },
-        label: {
-          HStack {
-            Text("\(theme)")
-              .foregroundStyle(colors.title)
-            Spacer()
-            if viewModel.appState.colorPalette.selectedTheme == theme {
-              Image(systemName: "checkmark.circle")
-                .foregroundStyle(colors.icon)
-            }
-          }
-          .padding(12)
-          .background(colors.box)
-          .cornerRadius(12)
-        }
-      )
-      .buttonStyle(.plain)
-      .padding(.horizontal, 12)
-    }
-    .background(colors.background)
+    Text("Perica")
+//    let colors = viewModel.appState.colorPalette.changeThemeViewColors
+//    
+//    ForEach(Kurcina.allCases, id: \.self) { theme in
+//      Button(
+//        action: {
+//          viewModel.changeTheme(theme)
+//        },
+//        label: {
+//          HStack {
+//            Text("\(theme)")
+//              .foregroundStyle(colors.title)
+//            Spacer()
+//            if viewModel.appState.colorPalette.selectedTheme == theme {
+//              Image(systemName: "checkmark.circle")
+//                .foregroundStyle(colors.icon)
+//            }
+//          }
+//          .padding(12)
+//          .background(colors.box)
+//          .cornerRadius(12)
+//        }
+//      )
+//      .buttonStyle(.plain)
+//      .padding(.horizontal, 12)
+//    }
+//    .background(colors.background)
   }
 }
 
@@ -78,23 +79,24 @@ extension ChangeThemeView {
 }
 
 #Preview {
-  @Previewable @State var appState = AppState()
-  ChangeThemeView(viewModel: .init(appState: appState))
+//  @Previewable @State var appState = AppState()
+//  ChangeThemeView(viewModel: .init(appState: appState))
+  ChangeThemeView()
 }
 
-extension ColorPalette {
-  var changeThemeViewColors: ChangeThemeView.Colors {
-    .init(
-      background: background.primary,
-      title: text.buttonTitle,
-      icon: highlight.tint,
-      box: background.header
-    )
-  }
-}
-
-fileprivate extension ColorPalette {
-  var selectedTheme: Kurcina {
-    self == ColorPalette.system ? .system : .custom
-  }
-}
+//extension ColorPalette {
+//  var changeThemeViewColors: ChangeThemeView.Colors {
+//    .init(
+//      background: background.primary,
+//      title: text.link,
+//      icon: highlight.tint,
+//      box: background.header
+//    )
+//  }
+//}
+//
+//fileprivate extension ColorPalette {
+//  var selectedTheme: Kurcina {
+//    self == ColorPalette.system ? .system : .custom
+//  }
+//}

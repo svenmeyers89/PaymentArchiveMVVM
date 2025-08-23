@@ -5,7 +5,7 @@
 //  Created by Sven Majeric on 10.08.2025..
 //
 
-extension EmptyView {
+extension EmptyArchiveView {
   struct ButtonConfiguration: Sendable, Identifiable {
     let title: String
     let action: @Sendable () -> Void
@@ -33,7 +33,7 @@ extension EmptyView {
   }
 }
 
-extension EmptyView.Configuration {
+extension EmptyArchiveView.Configuration {
   static func onboarding(
     createAccountAction: @Sendable @escaping () -> Void,
     showDemoAction: @Sendable @escaping () -> Void

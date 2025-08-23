@@ -17,7 +17,7 @@ extension ColorPalette {
     text: .init(
       primary: Color("TextPrimary"),
       secondary: Color("TextSecondary"),
-      buttonTitle: Color("TextButtonTitle"),
+      link: Color("TextButtonTitle"),
       caption: Color("TextCaption")
     ),
     highlight: .init(

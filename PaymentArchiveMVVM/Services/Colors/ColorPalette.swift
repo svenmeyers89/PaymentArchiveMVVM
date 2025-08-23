@@ -17,7 +17,7 @@ struct ColorPalette: Sendable, Equatable {
   struct Text: Sendable, Equatable {
     let primary: Color
     let secondary: Color
-    let buttonTitle: Color
+    let link: Color
     let caption: Color
   }
   

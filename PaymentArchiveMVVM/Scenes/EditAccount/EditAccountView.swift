@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-protocol AccountDataManager: Sendable {
+protocol EditAccountDataManager: Sendable {
   func save(account: Account) async throws
 }
 
@@ -34,11 +34,11 @@ enum EditAccountError: Error {
 @MainActor @Observable
 final class EditAccountViewModel {
   let edittedAccount: Account?
-  private let dataManager: AccountDataManager
+  private let dataManager: EditAccountDataManager
 
   init(
     edittedAccount: Account?,
-    dataManager: AccountDataManager
+    dataManager: EditAccountDataManager
   ) {
     self.edittedAccount = edittedAccount
     self.dataManager = dataManager
@@ -218,7 +218,7 @@ struct EditAccountView: View {
   )
 }
 
-fileprivate struct MockedDataStore: AccountDataManager {
+fileprivate struct MockedDataStore: EditAccountDataManager {
   func save(account: Account) async throws {
     print("Saving...")
     try await Task.sleep(nanoseconds: 3_000_000_000)

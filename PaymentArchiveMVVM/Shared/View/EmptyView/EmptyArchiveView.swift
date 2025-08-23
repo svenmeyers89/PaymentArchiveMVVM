@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EmptyView: View {
+struct EmptyArchiveView: View {
   let configuration: Configuration
 
   var body: some View {
@@ -52,9 +52,9 @@ struct EmptyView: View {
 }
 
 #Preview {
-  EmptyView(
+  EmptyArchiveView(
     configuration:
-      EmptyView.Configuration.onboarding(
+      EmptyArchiveView.Configuration.onboarding(
         createAccountAction: { print("Create Action") },
         showDemoAction: { print("Show Demo") }
       )
