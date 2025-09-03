@@ -14,20 +14,22 @@ struct UserDefaultsKeys {
 @main
 struct PaymentArchiveMVVMApp: App {
   @AppStorage(UserDefaultsKeys.selectedThemeID) private var selectedThemeID: String = Theme.defaultValue.rawValue
+  
+  let sceneFactory: SceneFactory = .init(
+    paymentArchive: PaymentArchive(
+      persistanceStore: SimplifiedDataStore.empty
+    )
+  )
 
   var body: some Scene {
     WindowGroup {
-      PaymentArchiveView(
-        viewModel: .init(
-          paymentArchive: .init(
-            persistanceStore: SimplifiedDataStore.empty
-          )
-        )
-      )
-      .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
-      .environment(\.setTheme) { newTheme in
-        selectedThemeID = newTheme.rawValue
-      }
+      sceneFactory
+        .buildPaymentArchiveScene()
+        .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
+        .environment(\.setTheme) { newTheme in
+          selectedThemeID = newTheme.rawValue
+        }
+        .environment(\.sceneFactory, sceneFactory)
     }
   }
 }

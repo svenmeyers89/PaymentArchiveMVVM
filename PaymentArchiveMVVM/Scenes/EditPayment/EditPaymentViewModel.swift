@@ -7,6 +7,10 @@
 
 import Foundation
 
+protocol EditPaymentDataManager: Sendable {
+  func save(payment: Payment) async throws
+}
+
 enum EditPaymentError: Error {
   case moneyAmountCannotBeEmptyOrZero
   case categoryEmpty
@@ -35,23 +39,34 @@ enum EditPaymentError: Error {
 
 @MainActor @Observable
 final class EditPaymentViewModel {
-  private(set) var state: EditPaymentState
+  var amount: Float?
+  var category: Payment.Category?
+  var note: String?
+  
+  let edittedPayment: Payment?
+  let selectedAccount: Account
+  let categories: [Payment.Category]
 
   nonisolated private let dataManager: EditPaymentDataManager
 
   init(
-    initialState: EditPaymentState,
+    edittedPayment: Payment?,
+    selectedAccount: Account,
+    categories: [Payment.Category],
     dataManager: EditPaymentDataManager
   ) {
-    self.state = initialState
+    self.edittedPayment = edittedPayment
+    self.selectedAccount = selectedAccount
+    self.categories = categories
+
+    self.amount = edittedPayment?.amount
+    self.category = edittedPayment?.category
+    self.note = edittedPayment?.note
+
     self.dataManager = dataManager
   }
   
-  func savePayment(
-    amount: Float?,
-    category: Payment.Category?,
-    note: String?
-  ) async -> Result<Void, EditPaymentError> {
+  func savePayment() async -> Result<Void, EditPaymentError> {
     guard let amount, amount > 0.0 else {
       return .failure(.moneyAmountCannotBeEmptyOrZero)
     }
@@ -59,13 +74,13 @@ final class EditPaymentViewModel {
       return .failure(.categoryEmpty)
     }
     let updatedPayment: Payment = {
-      if let edittedPayment = state.edittedPayment {
+      if let edittedPayment = edittedPayment {
         let updatedPayment = edittedPayment
           .updated(amount: amount, category: category, note: note)
         return updatedPayment
       } else {
         return .init(
-          accountId: state.selectedAccount.id,
+          accountId: selectedAccount.id,
           amount: amount,
           category: category,
           note: note

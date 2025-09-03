@@ -7,56 +7,29 @@
 
 import SwiftUI
 
-@MainActor @Observable
-final class PaymentArchiveViewModel {
+struct PaymentArchiveView: View {
   enum ContentType {
     case loading
     case onboarding
     case listView([Payment])
-    case error(message: String)
+    case error(String)
+  }
+
+  private enum Modal {
+    case updateAccount(Account?)
+    case updatePayment(Payment?)
+    case changeTheme
   }
   
-  private(set) var contentType: ContentType?
-  
-  private let paymentArchive: PaymentArchive
-
-  init(paymentArchive: PaymentArchive) {
-    self.paymentArchive = paymentArchive
-  }
-
-  func loadContent() async {
-    do {
-      contentType = .loading
-      try await paymentArchive.loadInitialState()
-
-      if let selectedAccountId = paymentArchive.state.selectedAccountId {
-        let accountPayments = paymentArchive.state.payments[selectedAccountId] ?? []
-        contentType = .listView(accountPayments)
-      } else {
-        contentType =  .onboarding
-      }
-    } catch {
-      let error = (error as NSError).localizedDescription
-      contentType = .error(message: error)
-    }
-  }
-}
-
-//extension ColorPalette {
-//  var paymentArchiveViewColors: PaymentArchiveView.Colors {
-//    .init(
-//      background: background.primary,
-//      buttonTitle: text.link
-//    )
-//  }
-//}
-
-struct PaymentArchiveView: View {
   private var viewModel: PaymentArchiveViewModel
   
+  @Environment(\.sceneFactory) private var sceneFactory
+
   @State
-  private var isChangeThemeModalPresented: Bool = false
-  
+  private var didLoadContentOnDidAppear: Bool = false
+  @State
+  private var presentedModal: Modal? = nil
+
   init(viewModel: PaymentArchiveViewModel) {
     self.viewModel = viewModel
   }
@@ -80,41 +53,72 @@ struct PaymentArchiveView: View {
       case .onboarding:
         EmptyArchiveView(
           configuration: .onboarding(
-            createAccountAction: { print("Create account!") },
+            createAccountAction: {
+              presentedModal = .updateAccount(nil)
+            },
             showDemoAction: { print("Show Demo!") }
           )
         )
       case .listView(let payments):
         List(payments, id: \.id) { payment in
-          PaymentView(payment: payment)
+          Button(action: {
+            presentedModal = .updatePayment(payment)
+          }) {
+            PaymentView(payment: payment)
+              .frame(maxWidth: .infinity)
+              .contentShape(Rectangle())
+          }
+          .buttonStyle(PlainButtonStyle())
         }
-      case .none:
-        Text("Bla")
-        // EmptyView()
+        .overlay {
+          CircleButton(
+            size: 70, iconName: "plus",
+            colors: .init(background: .blue, icon: .white)
+          ) {
+            presentedModal = .updatePayment(nil)
+          }
+        }
       }
     }
     .onAppear {
-      if viewModel.contentType == nil {
+      if !didLoadContentOnDidAppear {
         Task {
           await viewModel.loadContent()
+          didLoadContentOnDidAppear = true
         }
+      }
+    }
+    .sheet(
+      isPresented: .init(
+        get: { presentedModal != nil },
+        set: { isPresented in
+          if !isPresented {
+            presentedModal = nil
+          }
+        }
+      )
+    ) {
+      switch presentedModal {
+      case .updateAccount(let account):
+        sceneFactory?
+          .buildEditAccountScene(account: account)
+      case .updatePayment(let payment):
+        sceneFactory?
+          .buildEditPaymentScene(payment: payment)
+      case .changeTheme, .none:
+        EmptyView()
       }
     }
   }
 }
 
-//extension PaymentArchiveView {
-//  struct Colors: Sendable, Equatable {
-//    let background: Color
-//    let buttonTitle: Color
-//  }
-//}
-
 #Preview {
-  @Previewable @State var paymentArchive = PaymentArchive(
-    persistanceStore: SimplifiedDataStore.empty
+  let sceneFactory = SceneFactory(
+    paymentArchive: .init(
+      persistanceStore: SimplifiedDataStore.empty
+    )
   )
-  return PaymentArchiveView(
-    viewModel: .init(paymentArchive: paymentArchive)
-  )
+  return sceneFactory
+    .buildPaymentArchiveScene()
+    .environment(\.sceneFactory, sceneFactory)
 }

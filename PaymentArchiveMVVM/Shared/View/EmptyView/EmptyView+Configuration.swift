@@ -8,7 +8,7 @@
 extension EmptyArchiveView {
   struct ButtonConfiguration: Sendable, Identifiable {
     let title: String
-    let action: @Sendable () -> Void
+    let action: @MainActor () -> Void
 
     var id: String { title }
   }
@@ -35,8 +35,8 @@ extension EmptyArchiveView {
 
 extension EmptyArchiveView.Configuration {
   static func onboarding(
-    createAccountAction: @Sendable @escaping () -> Void,
-    showDemoAction: @Sendable @escaping () -> Void
+    createAccountAction: @MainActor @escaping () -> Void,
+    showDemoAction: @MainActor @escaping () -> Void
   ) -> Self {
     .init(
       title: "Welcome to PaymentArchive blablabla bla bla bla",
@@ -56,7 +56,7 @@ extension EmptyArchiveView.Configuration {
   }
   
   static func emptyArchive(
-    addPaymentAction: @Sendable @escaping () -> Void
+    addPaymentAction: @MainActor @escaping () -> Void
   ) -> Self {
     .init(
       title: "Your Archive is Empty",
@@ -73,7 +73,7 @@ extension EmptyArchiveView.Configuration {
   
   static func error(
     message: String,
-    refreshAction: @Sendable @escaping () -> Void
+    refreshAction: @MainActor @escaping () -> Void
   ) -> Self {
     .init(
       title: "Oops, something went wrong",

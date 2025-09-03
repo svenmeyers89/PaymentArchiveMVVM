@@ -8,24 +8,15 @@
 import SwiftUI
 
 struct EditPaymentView: View {
-  private var viewModel: EditPaymentViewModel
-  
-  @State private var amount: Float?
-  @State private var category: Payment.Category?
-  @State private var note: String?
+  @Bindable private var viewModel: EditPaymentViewModel
   
   @State private var isActionInProgress: Bool = false
   @State private var toastMessage: ToastBar.Message? = nil
 
   @Environment(\.theme) var theme
 
-  init(
-    viewModel: @autoclosure @escaping () -> EditPaymentViewModel
-  ) {
-    self.viewModel = viewModel()
-    self.amount = viewModel().state.edittedPayment?.amount
-    self.category = viewModel().state.edittedPayment?.category
-    self.note = viewModel().state.edittedPayment?.note
+  init(viewModel: EditPaymentViewModel) {
+    self.viewModel = viewModel
   }
 
   var body: some View {
@@ -37,15 +28,15 @@ struct EditPaymentView: View {
           Spacer()
           
           MoneyAmountTextField(
-            amount: $amount,
-            currency: viewModel.state.selectedAccount.currency,
+            amount: $viewModel.amount,
+            currency: viewModel.selectedAccount.currency,
             colors: moneyAmountTextFieldColors
           )
           .padding(.bottom, 16)
           
           CategorySelector(
-            selectedCategory: $category,
-            categories: viewModel.state.categories,
+            selectedCategory: $viewModel.category,
+            categories: viewModel.categories,
             colors: categorySelectorColors
           )
           .padding(.bottom, 16)
@@ -54,12 +45,7 @@ struct EditPaymentView: View {
           Button("Save") {
             Task {
               isActionInProgress = true
-              let result = await viewModel
-                .savePayment(
-                  amount: amount,
-                  category: category,
-                  note: note
-                )
+              let result = await viewModel.savePayment()
               switch result {
               case .success:
                 print("success!")
@@ -127,16 +113,14 @@ extension EditPaymentView {
 #Preview {
   EditPaymentView(
     viewModel: EditPaymentViewModel(
-      initialState: .init(
-        edittedPayment: nil,
-        selectedAccount: Account(
-          name: "Perica",
-          paymentIds: ["1", "2", "3"],
-          currency: "$",
-          useBiometry: false
-        ),
-        categories: Payment.Category.allCases
+      edittedPayment: nil,
+      selectedAccount: Account(
+        name: "Perica",
+        paymentIds: ["1", "2", "3"],
+        currency: "$",
+        useBiometry: false
       ),
+      categories: Payment.Category.allCases,
       dataManager: MockedDataStore()
     )
   )
