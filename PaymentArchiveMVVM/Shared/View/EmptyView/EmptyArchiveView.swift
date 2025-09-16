@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EmptyArchiveView: View {
+  let colors: Colors
   let configuration: Configuration
 
   var body: some View {
@@ -21,12 +22,14 @@ struct EmptyArchiveView: View {
               .aspectRatio(contentMode: .fit)
               .frame(maxWidth: maxSide, maxHeight: maxSide)
               .padding(.bottom, 24)
+              .foregroundStyle(colors.icon)
           }
           if let title = configuration.title {
             Text(title)
               .font(.title)
               .multilineTextAlignment(.center)
               .padding(.bottom, 12)
+              .foregroundStyle(colors.title)
           }
           if let description = configuration.description {
             Text(description)
@@ -34,6 +37,7 @@ struct EmptyArchiveView: View {
               .lineSpacing(8)
               .multilineTextAlignment(.center)
               .padding(.bottom, 36)
+              .foregroundStyle(colors.description)
           }
 
           ForEach(configuration.buttons) { button in
@@ -41,6 +45,7 @@ struct EmptyArchiveView: View {
               button.action()
             }
             .padding(.bottom, 12)
+            .foregroundStyle(colors.button)
           }
         }
         .frame(maxWidth: .infinity)
@@ -48,11 +53,29 @@ struct EmptyArchiveView: View {
         .padding()
       }
     }
+    .background(colors.background)
+  }
+}
+
+extension EmptyArchiveView {
+  struct Colors {
+    let background: Color
+    let icon: Color
+    let title: Color
+    let description: Color
+    let button: Color
   }
 }
 
 #Preview {
   EmptyArchiveView(
+    colors: .init(
+      background: .primary,
+      icon: .blue,
+      title: .primary,
+      description: .primary,
+      button: .blue
+    ),
     configuration:
       EmptyArchiveView.Configuration.onboarding(
         createAccountAction: { print("Create Action") },

@@ -20,10 +20,11 @@ struct PaymentArchiveView: View {
     case updatePayment(Payment?)
     case changeTheme
   }
-  
+
   private var viewModel: PaymentArchiveViewModel
   
   @Environment(\.sceneFactory) private var sceneFactory
+  @Environment(\.theme) private var theme
 
   @State
   private var didLoadContentOnDidAppear: Bool = false
@@ -41,6 +42,7 @@ struct PaymentArchiveView: View {
         ProgressView()
       case .error(let message):
         EmptyArchiveView(
+          colors: emptyArchiveViewColors,
           configuration: .error(
             message: message,
             refreshAction: {
@@ -52,6 +54,7 @@ struct PaymentArchiveView: View {
         )
       case .onboarding:
         EmptyArchiveView(
+          colors: emptyArchiveViewColors,
           configuration: .onboarding(
             createAccountAction: {
               presentedModal = .updateAccount(nil)
@@ -64,16 +67,19 @@ struct PaymentArchiveView: View {
           Button(action: {
             presentedModal = .updatePayment(payment)
           }) {
-            PaymentView(payment: payment)
-              .frame(maxWidth: .infinity)
-              .contentShape(Rectangle())
+            PaymentView(
+              payment: payment,
+              colors: paymentViewColors
+            )
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
           }
           .buttonStyle(PlainButtonStyle())
         }
         .overlay {
           CircleButton(
             size: 70, iconName: "plus",
-            colors: .init(background: .blue, icon: .white)
+            colors: circleButtonColors
           ) {
             presentedModal = .updatePayment(nil)
           }
@@ -109,6 +115,38 @@ struct PaymentArchiveView: View {
         EmptyView()
       }
     }
+  }
+}
+
+extension PaymentArchiveView {
+  var paymentViewColors: PaymentView.Colors {
+    .init(
+      background: .yellow, // theme.colorPalette.background.primary,
+      categoryIcon: .init(
+        iconBackground: theme.colorPalette.highlight.icon,
+        iconTint: theme.colorPalette.highlight.tint
+      ),
+      paymentDateTime: theme.colorPalette.text.secondary,
+      categoryName: theme.colorPalette.text.primary,
+      paymentAmount: theme.colorPalette.text.primary
+    )
+  }
+
+  var emptyArchiveViewColors: EmptyArchiveView.Colors {
+    .init(
+      background: theme.colorPalette.background.primary,
+      icon: theme.colorPalette.highlight.tint,
+      title: theme.colorPalette.text.primary,
+      description: theme.colorPalette.text.primary,
+      button: theme.colorPalette.text.link
+    )
+  }
+  
+  var circleButtonColors: CircleButton.Colors {
+    .init(
+      background: theme.colorPalette.highlight.tint,
+      icon: theme.colorPalette.highlight.icon
+    )
   }
 }
 

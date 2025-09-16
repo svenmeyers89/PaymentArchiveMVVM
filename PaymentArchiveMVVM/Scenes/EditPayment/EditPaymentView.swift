@@ -76,13 +76,6 @@ struct EditPaymentView: View {
 }
 
 extension EditPaymentView {
-  struct Colors {
-    let background: Color
-    let moneyAmountTextField: MoneyAmountTextField.Colors
-    let categorySelector: CategorySelector.Colors
-    // TODO: Add button colors
-  }
-
   var backgroundColor: Color {
     theme.background.primary
   }
