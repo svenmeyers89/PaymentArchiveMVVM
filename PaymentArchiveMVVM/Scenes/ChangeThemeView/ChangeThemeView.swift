@@ -7,96 +7,61 @@
 
 import SwiftUI
 
-//@MainActor @Observable
-//final class ChangeThemeViewModel {
-//  private(set) var appState: AppState
-//  
-//  init(appState: AppState) {
-//    print("init ChangeThemeViewModel")
-//    self.appState = appState
-//  }
-//
-//  func changeTheme(_ theme: Kurcina) {
-//    switch theme {
-//    case .system:
-//      appState.colorPalette = ColorPalette.system
-//    case .custom:
-//      appState.colorPalette = ColorPalette.custom
-//    }
-//  }
-//}
-//
-//enum Kurcina: String, Equatable, CaseIterable {
-//  case system
-//  case custom
-//}
-
 struct ChangeThemeView: View {
-//  let viewModel: ChangeThemeViewModel
-//  
-//  var colors: ChangeThemeView.Colors {
-//    viewModel.appState.colorPalette.changeThemeViewColors
-//  }
-  
+  @Environment(\.theme) private var selectedTheme
+  @Environment(\.setTheme) private var setTheme
+
   var body: some View {
-    Text("Perica")
-//    let colors = viewModel.appState.colorPalette.changeThemeViewColors
-//    
-//    ForEach(Kurcina.allCases, id: \.self) { theme in
-//      Button(
-//        action: {
-//          viewModel.changeTheme(theme)
-//        },
-//        label: {
-//          HStack {
-//            Text("\(theme)")
-//              .foregroundStyle(colors.title)
-//            Spacer()
-//            if viewModel.appState.colorPalette.selectedTheme == theme {
-//              Image(systemName: "checkmark.circle")
-//                .foregroundStyle(colors.icon)
-//            }
-//          }
-//          .padding(12)
-//          .background(colors.box)
-//          .cornerRadius(12)
-//        }
-//      )
-//      .buttonStyle(.plain)
-//      .padding(.horizontal, 12)
-//    }
-//    .background(colors.background)
+    ForEach(Theme.allCases, id: \.self) { theme in
+      Button(
+        action: {
+          setTheme(theme)
+        },
+        label: {
+          HStack {
+            Text("\(theme)")
+              .foregroundStyle(themeTitleColor)
+            Spacer()
+            if selectedTheme == theme {
+              Image(systemName: "checkmark.circle")
+                .foregroundStyle(checkmarkIconColor)
+            }
+          }
+          .padding(12)
+          .background(themeBoxColor)
+          .cornerRadius(12)
+        }
+      )
+      .buttonStyle(.plain)
+      .padding(.horizontal, 12)
+    }
+    .background(backgroundColor)
   }
 }
 
 extension ChangeThemeView {
-  struct Colors: Sendable {
-    let background: Color
-    let title: Color
-    let icon: Color
-    let box: Color
+  var backgroundColor: Color {
+    selectedTheme.colorPalette.background.primary
+  }
+  
+  var themeTitleColor: Color {
+    selectedTheme.colorPalette.text.primary
+  }
+  
+  var checkmarkIconColor: Color {
+    selectedTheme.colorPalette.highlight.tint
+  }
+  
+  var themeBoxColor: Color {
+    selectedTheme.colorPalette.background.header
   }
 }
 
 #Preview {
-//  @Previewable @State var appState = AppState()
-//  ChangeThemeView(viewModel: .init(appState: appState))
+  @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
   ChangeThemeView()
+    .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
+    .environment(\.setTheme) { newTheme in
+      selectedThemeID = newTheme.rawValue
+    }
 }
-
-//extension ColorPalette {
-//  var changeThemeViewColors: ChangeThemeView.Colors {
-//    .init(
-//      background: background.primary,
-//      title: text.link,
-//      icon: highlight.tint,
-//      box: background.header
-//    )
-//  }
-//}
-//
-//fileprivate extension ColorPalette {
-//  var selectedTheme: Kurcina {
-//    self == ColorPalette.system ? .system : .custom
-//  }
-//}
