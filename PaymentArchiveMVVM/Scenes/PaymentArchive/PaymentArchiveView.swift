@@ -137,45 +137,42 @@ struct PaymentArchiveView: View {
 extension PaymentArchiveView {
   var paymentViewColors: PaymentView.Colors {
     .init(
-      background: .yellow, // theme.colorPalette.background.primary,
+      background: theme.background.primary,
       categoryIcon: .init(
-        iconBackground: theme.colorPalette.highlight.icon,
-        iconTint: theme.colorPalette.highlight.tint
+        iconBackground: theme.highlight.icon,
+        iconTint: theme.highlight.tint
       ),
-      paymentDateTime: theme.colorPalette.text.secondary,
-      categoryName: theme.colorPalette.text.primary,
-      paymentAmount: theme.colorPalette.text.primary
+      paymentDateTime: theme.text.secondary,
+      categoryName: theme.text.primary,
+      paymentAmount: theme.text.primary
     )
   }
 
   var emptyArchiveViewColors: EmptyArchiveView.Colors {
     .init(
-      background: theme.colorPalette.background.primary,
-      icon: theme.colorPalette.highlight.tint,
-      title: theme.colorPalette.text.primary,
-      description: theme.colorPalette.text.primary,
-      button: theme.colorPalette.text.link
+      background: theme.background.primary,
+      icon: theme.highlight.tint,
+      title: theme.text.primary,
+      description: theme.text.primary,
+      button: theme.text.link
     )
   }
   
   var circleButtonColors: CircleButton.Colors {
     .init(
-      background: theme.colorPalette.highlight.tint,
-      icon: theme.colorPalette.highlight.icon
+      background: theme.highlight.tint,
+      icon: theme.highlight.icon
     )
   }
 }
 
 #Preview {
   @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
-  let sceneFactory = SceneFactory(
-    paymentArchive: .init(
-      persistanceStore: SimplifiedDataStore.singleAccountWithMultiplePayments
-    )
-  )
-  return sceneFactory
+  let dependencyManager = DependencyManager.mockedWithPopulatedStore
+  return dependencyManager
+    .sceneFactory
     .buildPaymentArchiveScene()
-    .environment(\.sceneFactory, sceneFactory)
+    .environment(\.sceneFactory, dependencyManager.sceneFactory)
     .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
     .environment(\.setTheme) { newTheme in
       selectedThemeID = newTheme.rawValue

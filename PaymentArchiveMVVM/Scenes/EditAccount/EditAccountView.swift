@@ -102,26 +102,26 @@ struct EditAccountView: View {
 
 extension EditAccountView {
   var backgroundColor: Color {
-    theme.colorPalette.background.primary
+    theme.background.primary
   }
   
   var textFieldTextColor: Color {
-    theme.colorPalette.text.primary
+    theme.text.primary
   }
   
   var biometryTitleColor: Color {
-    theme.colorPalette.text.primary
+    theme.text.primary
   }
   
   var biometricToggleSwitchColor: Color {
-    theme.colorPalette.highlight.tint
+    theme.highlight.tint
   }
   
   var predefinedCurrencySelectorColors: PredefinedCurrencySelector.Colors {
     .init(
-      background: theme.colorPalette.background.primary,
-      buttonBackground: theme.colorPalette.selector.background,
-      buttonText: theme.colorPalette.selector.title
+      background: theme.background.primary,
+      buttonBackground: theme.selector.background,
+      buttonText: theme.selector.title
     )
   }
 }
