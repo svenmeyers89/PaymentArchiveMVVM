@@ -16,7 +16,7 @@ struct PaymentArchiveView: View {
   }
 
   private enum Modal {
-    case updateAccount(Account?)
+    case updateAccount(EditAccountUseCase)
     case updatePayment(EditPaymentUseCase)
     case changeTheme
   }
@@ -58,7 +58,7 @@ struct PaymentArchiveView: View {
             colors: emptyArchiveViewColors,
             configuration: .onboarding(
               createAccountAction: {
-                presentedModal = .updateAccount(nil)
+                presentedModal = .updateAccount(.addNewAccount)
               },
               showDemoAction: { print("Show Demo!") }
             )
@@ -108,9 +108,9 @@ struct PaymentArchiveView: View {
         )
       ) {
         switch presentedModal {
-        case .updateAccount(let account):
+        case .updateAccount(let useCase):
           sceneFactory?
-            .buildEditAccountScene(account: account)
+            .buildEditAccountScene(useCase: useCase)
         case .updatePayment(let useCase):
           sceneFactory?
             .buildEditPaymentScene(useCase: useCase)

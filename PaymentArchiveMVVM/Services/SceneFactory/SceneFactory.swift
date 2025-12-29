@@ -21,9 +21,9 @@ struct SceneFactory {
     return paymentArchiveView
   }
   
-  func buildEditAccountScene(account: Account?) -> EditAccountView {
+  func buildEditAccountScene(useCase: EditAccountUseCase) -> EditAccountView {
     let viewModel = EditAccountViewModel(
-      edittedAccount: account,
+      useCase: useCase,
       dataManager: paymentArchive
     )
     let editAccountView = EditAccountView(viewModel: viewModel)

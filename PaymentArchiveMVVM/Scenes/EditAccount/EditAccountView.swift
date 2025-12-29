@@ -81,7 +81,7 @@ struct EditAccountView: View {
 
                 switch result {
                 case .success:
-                  break
+                  dismiss()
                 case .failure(let error):
                   self.toastMessage = ToastBar.Message(
                     text: error.message,
@@ -90,7 +90,6 @@ struct EditAccountView: View {
                 }
                 
                 self.isActionInProgress = false
-                dismiss()
               }
             }
           }
@@ -127,9 +126,12 @@ extension EditAccountView {
 }
 
 #Preview {
+  let useCase: EditAccountUseCase =
+    //.addNewAccount
+    .editAccount(.init(name: "Sven", paymentIds: [], currency: "EUR", useBiometry: true))
   EditAccountView(
     viewModel: .init(
-      edittedAccount: nil, //.init(name: "Sven", paymentIds: [], currency: "EUR", useBiometry: true),
+      useCase: useCase,
       dataManager: MockedDataStore()
     )
   )
