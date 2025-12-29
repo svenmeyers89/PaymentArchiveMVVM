@@ -20,10 +20,11 @@ struct PaymentArchiveView: View {
     case updatePayment(Payment?)
     case changeTheme
   }
-  
+
   private var viewModel: PaymentArchiveViewModel
   
   @Environment(\.sceneFactory) private var sceneFactory
+  @Environment(\.theme) private var theme
 
   @State
   private var didLoadContentOnDidAppear: Bool = false
@@ -35,90 +36,145 @@ struct PaymentArchiveView: View {
   }
 
   var body: some View {
-    Group {
-      switch viewModel.contentType {
-      case .loading:
-        ProgressView()
-      case .error(let message):
-        EmptyArchiveView(
-          configuration: .error(
-            message: message,
-            refreshAction: {
-              Task {
-                await viewModel.loadContent()
+    NavigationStack {
+      Group {
+        switch viewModel.contentType {
+        case .loading:
+          ProgressView()
+        case .error(let message):
+          EmptyArchiveView(
+            colors: emptyArchiveViewColors,
+            configuration: .error(
+              message: message,
+              refreshAction: {
+                Task {
+                  await viewModel.loadContent()
+                }
               }
-            }
+            )
           )
-        )
-      case .onboarding:
-        EmptyArchiveView(
-          configuration: .onboarding(
-            createAccountAction: {
-              presentedModal = .updateAccount(nil)
-            },
-            showDemoAction: { print("Show Demo!") }
+        case .onboarding:
+          EmptyArchiveView(
+            colors: emptyArchiveViewColors,
+            configuration: .onboarding(
+              createAccountAction: {
+                presentedModal = .updateAccount(nil)
+              },
+              showDemoAction: { print("Show Demo!") }
+            )
           )
-        )
-      case .listView(let payments):
-        List(payments, id: \.id) { payment in
-          Button(action: {
-            presentedModal = .updatePayment(payment)
-          }) {
-            PaymentView(payment: payment)
+        case .listView(let payments):
+          List(payments, id: \.id) { payment in
+            Button(action: {
+              presentedModal = .updatePayment(payment)
+            }) {
+              PaymentView(
+                payment: payment,
+                colors: paymentViewColors
+              )
               .frame(maxWidth: .infinity)
               .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
           }
-          .buttonStyle(PlainButtonStyle())
-        }
-        .overlay {
-          CircleButton(
-            size: 70, iconName: "plus",
-            colors: .init(background: .blue, icon: .white)
-          ) {
-            presentedModal = .updatePayment(nil)
+          .overlay {
+            CircleButton(
+              size: 70, iconName: "plus",
+              colors: circleButtonColors
+            ) {
+              presentedModal = .updatePayment(nil)
+            }
           }
         }
       }
-    }
-    .onAppear {
-      if !didLoadContentOnDidAppear {
-        Task {
-          await viewModel.loadContent()
-          didLoadContentOnDidAppear = true
-        }
-      }
-    }
-    .sheet(
-      isPresented: .init(
-        get: { presentedModal != nil },
-        set: { isPresented in
-          if !isPresented {
-            presentedModal = nil
+      .onAppear {
+        if !didLoadContentOnDidAppear {
+          Task {
+            await viewModel.loadContent()
+            didLoadContentOnDidAppear = true
           }
         }
-      )
-    ) {
-      switch presentedModal {
-      case .updateAccount(let account):
-        sceneFactory?
-          .buildEditAccountScene(account: account)
-      case .updatePayment(let payment):
-        sceneFactory?
-          .buildEditPaymentScene(payment: payment)
-      case .changeTheme, .none:
-        EmptyView()
+      }
+      .sheet(
+        isPresented: .init(
+          get: { presentedModal != nil },
+          set: { isPresented in
+            if !isPresented {
+              presentedModal = nil
+            }
+          }
+        )
+      ) {
+        switch presentedModal {
+        case .updateAccount(let account):
+          sceneFactory?
+            .buildEditAccountScene(account: account)
+        case .updatePayment(let payment):
+          sceneFactory?
+            .buildEditPaymentScene(payment: payment)
+        case .changeTheme:
+          ChangeThemeView()
+        default:
+          EmptyView()
+            .onAppear {
+              assertionFailure("Unsupported modal!")
+            }
+        }
+      }
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button {
+            presentedModal = .changeTheme
+          } label: {
+            Image(systemName: "paintpalette")
+          }
+        }
       }
     }
   }
 }
 
-#Preview {
-  let sceneFactory = SceneFactory(
-    paymentArchive: .init(
-      persistanceStore: SimplifiedDataStore.empty
+extension PaymentArchiveView {
+  var paymentViewColors: PaymentView.Colors {
+    .init(
+      background: theme.background.primary,
+      categoryIcon: .init(
+        iconBackground: theme.highlight.icon,
+        iconTint: theme.highlight.tint
+      ),
+      paymentDateTime: theme.text.secondary,
+      categoryName: theme.text.primary,
+      paymentAmount: theme.text.primary
     )
-  )
-  return sceneFactory
+  }
+
+  var emptyArchiveViewColors: EmptyArchiveView.Colors {
+    .init(
+      background: theme.background.primary,
+      icon: theme.highlight.tint,
+      title: theme.text.primary,
+      description: theme.text.primary,
+      button: theme.text.link
+    )
+  }
+  
+  var circleButtonColors: CircleButton.Colors {
+    .init(
+      background: theme.highlight.tint,
+      icon: theme.highlight.icon
+    )
+  }
+}
+
+#Preview {
+  @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
+  let dependencyManager = DependencyManager.mockedWithPopulatedStore
+  return dependencyManager
+    .sceneFactory
     .buildPaymentArchiveScene()
-    .environment(\.sceneFactory, sceneFactory)
+    .environment(\.sceneFactory, dependencyManager.sceneFactory)
+    .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
+    .environment(\.setTheme) { newTheme in
+      selectedThemeID = newTheme.rawValue
+    }
 }

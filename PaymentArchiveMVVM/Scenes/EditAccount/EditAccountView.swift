@@ -13,7 +13,8 @@ struct EditAccountView: View {
   @State private var isActionInProgress: Bool = false
   @State private var toastMessage: ToastBar.Message? = nil
   
-  @Environment(\.dismiss) var dismiss
+  @Environment(\.theme) private var theme
+  @Environment(\.dismiss) private var dismiss
   
   init(viewModel: EditAccountViewModel) {
     self.viewModel = viewModel
@@ -26,37 +27,29 @@ struct EditAccountView: View {
           VStack(spacing: 8) {
             TextField("Account name", text: $viewModel.accountName)
               .textFieldStyle(RoundedBorderTextFieldStyle())
+              .foregroundStyle(textFieldTextColor)
             
             Toggle(isOn: $viewModel.useBiometry) {
               Text("Use biometry on app open?")
                 .font(.body)
             }
+            .foregroundStyle(biometryTitleColor)
+            .tint(biometricToggleSwitchColor)
             .padding(.bottom, 24)
             .padding(.horizontal, 8)
             
             VStack(spacing: 12) {
               TextField("Currency", text: $viewModel.currency)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .foregroundStyle(textFieldTextColor)
                 .disabled(viewModel.isEditingCurrencyDisabled)
 
               if !viewModel.isEditingCurrencyDisabled {
-                HStack(spacing: 16) {
-                  ForEach(PrederfinedCurrency.allCases, id: \.self) { currency in
-                    Button(action: {
-                      viewModel.currency = currency.rawValue
-                    }) {
-                      HStack {
-                        Spacer()
-                        Text(currency.symbol)
-                          .font(.headline)
-                          .foregroundStyle(.green)
-                          .padding(.vertical, 8)
-                        Spacer()
-                      }
-                      .background(.yellow)
-                      .cornerRadius(10)
-                    }
-                  }
+                PredefinedCurrencySelector(
+                  predefinedCurrencies: PrederfinedCurrency.allCases,
+                  colors: predefinedCurrencySelectorColors
+                ) { selectedCurrency in
+                  viewModel.currency = selectedCurrency.rawValue
                 }
               }
             }
@@ -64,6 +57,7 @@ struct EditAccountView: View {
             Spacer()
           }
           .padding()
+          .background(backgroundColor)
         } completion: {
           self.toastMessage = nil
         }
@@ -103,6 +97,32 @@ struct EditAccountView: View {
         }
     }
     .disabled(isActionInProgress)
+  }
+}
+
+extension EditAccountView {
+  var backgroundColor: Color {
+    theme.background.primary
+  }
+  
+  var textFieldTextColor: Color {
+    theme.text.primary
+  }
+  
+  var biometryTitleColor: Color {
+    theme.text.primary
+  }
+  
+  var biometricToggleSwitchColor: Color {
+    theme.highlight.tint
+  }
+  
+  var predefinedCurrencySelectorColors: PredefinedCurrencySelector.Colors {
+    .init(
+      background: theme.background.primary,
+      buttonBackground: theme.selector.background,
+      buttonText: theme.selector.title
+    )
   }
 }
 

@@ -13,7 +13,8 @@ struct EditPaymentView: View {
   @State private var isActionInProgress: Bool = false
   @State private var toastMessage: ToastBar.Message? = nil
 
-  @Environment(\.theme) var theme
+  @Environment(\.theme) private var theme
+  @Environment(\.dismiss) private var dismiss
 
   init(viewModel: EditPaymentViewModel) {
     self.viewModel = viewModel
@@ -45,15 +46,19 @@ struct EditPaymentView: View {
           Button("Save") {
             Task {
               isActionInProgress = true
+              
               let result = await viewModel.savePayment()
+              
+              isActionInProgress = false
+
               switch result {
               case .success:
                 print("success!")
+                dismiss()
               case .failure(let error):
                 self.toastMessage = error.toastBarMessage
                 print("error: \(error)")
               }
-              isActionInProgress = false
             }
           }
           .padding(.bottom, 32)
@@ -76,13 +81,6 @@ struct EditPaymentView: View {
 }
 
 extension EditPaymentView {
-  struct Colors {
-    let background: Color
-    let moneyAmountTextField: MoneyAmountTextField.Colors
-    let categorySelector: CategorySelector.Colors
-    // TODO: Add button colors
-  }
-
   var backgroundColor: Color {
     theme.background.primary
   }
