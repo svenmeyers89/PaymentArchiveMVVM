@@ -37,31 +37,43 @@ enum EditPaymentError: Error {
   }
 }
 
+enum EditPaymentUseCase {
+  case addNewPayment(selectedAccountId: String)
+  case editPayment(Payment)
+}
+
 @MainActor @Observable
 final class EditPaymentViewModel {
   var amount: Float?
   var category: Payment.Category?
   var note: String?
   
-  let edittedPayment: Payment?
-  let selectedAccount: Account
+  private let useCase: EditPaymentUseCase
+  let currency: String
   let categories: [Payment.Category]
 
   nonisolated private let dataManager: EditPaymentDataManager
 
   init(
-    edittedPayment: Payment?,
-    selectedAccount: Account,
+    useCase: EditPaymentUseCase,
+    currency: String,
     categories: [Payment.Category],
     dataManager: EditPaymentDataManager
   ) {
-    self.edittedPayment = edittedPayment
-    self.selectedAccount = selectedAccount
+    self.useCase = useCase
     self.categories = categories
+    self.currency = currency
 
-    self.amount = edittedPayment?.amount
-    self.category = edittedPayment?.category
-    self.note = edittedPayment?.note
+    switch useCase {
+    case .addNewPayment:
+      self.amount = nil
+      self.category = nil
+      self.note = nil
+    case .editPayment(let payment):
+      self.amount = payment.amount
+      self.category = payment.category
+      self.note = payment.note
+    }
 
     self.dataManager = dataManager
   }
@@ -74,17 +86,17 @@ final class EditPaymentViewModel {
       return .failure(.categoryEmpty)
     }
     let updatedPayment: Payment = {
-      if let edittedPayment = edittedPayment {
-        let updatedPayment = edittedPayment
-          .updated(amount: amount, category: category, note: note)
-        return updatedPayment
-      } else {
+      switch useCase {
+      case .addNewPayment(let selectedAccountId):
         return .init(
-          accountId: selectedAccount.id,
+          accountId: selectedAccountId,
           amount: amount,
           category: category,
           note: note
         )
+      case .editPayment(let payment):
+        let updatedPayment = payment.updated(amount: amount, category: category, note: note)
+        return updatedPayment
       }
     }()
     do {

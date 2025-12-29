@@ -11,13 +11,13 @@ struct PaymentArchiveView: View {
   enum ContentType {
     case loading
     case onboarding
-    case listView([Payment])
+    case listView([Payment], selectedAccountId: String)
     case error(String)
   }
 
   private enum Modal {
     case updateAccount(Account?)
-    case updatePayment(Payment?)
+    case updatePayment(EditPaymentUseCase)
     case changeTheme
   }
 
@@ -63,10 +63,10 @@ struct PaymentArchiveView: View {
               showDemoAction: { print("Show Demo!") }
             )
           )
-        case .listView(let payments):
+        case .listView(let payments, let selectedAccountId):
           List(payments, id: \.id) { payment in
             Button(action: {
-              presentedModal = .updatePayment(payment)
+              presentedModal = .updatePayment(.editPayment(payment))
             }) {
               PaymentView(
                 payment: payment,
@@ -82,7 +82,9 @@ struct PaymentArchiveView: View {
               size: 70, iconName: "plus",
               colors: circleButtonColors
             ) {
-              presentedModal = .updatePayment(nil)
+              presentedModal = .updatePayment(
+                .addNewPayment(selectedAccountId: selectedAccountId)
+              )
             }
           }
         }
@@ -109,9 +111,9 @@ struct PaymentArchiveView: View {
         case .updateAccount(let account):
           sceneFactory?
             .buildEditAccountScene(account: account)
-        case .updatePayment(let payment):
+        case .updatePayment(let useCase):
           sceneFactory?
-            .buildEditPaymentScene(payment: payment)
+            .buildEditPaymentScene(useCase: useCase)
         case .changeTheme:
           ChangeThemeView()
         default:

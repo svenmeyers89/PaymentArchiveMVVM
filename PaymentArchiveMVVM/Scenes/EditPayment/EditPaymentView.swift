@@ -30,7 +30,7 @@ struct EditPaymentView: View {
           
           MoneyAmountTextField(
             amount: $viewModel.amount,
-            currency: viewModel.selectedAccount.currency,
+            currency: viewModel.currency,
             colors: moneyAmountTextFieldColors
           )
           .padding(.bottom, 16)
@@ -109,15 +109,13 @@ extension EditPaymentView {
 }
 
 #Preview {
+  let useCase: EditPaymentUseCase =
+    .editPayment(.init(accountId: "123", amount: 123, category: .accommodation))
+    //.addNewPayment(selectedAccountId: "123")
   EditPaymentView(
     viewModel: EditPaymentViewModel(
-      edittedPayment: nil,
-      selectedAccount: Account(
-        name: "Perica",
-        paymentIds: ["1", "2", "3"],
-        currency: "$",
-        useBiometry: false
-      ),
+      useCase: useCase,
+      currency: "$",
       categories: Payment.Category.allCases,
       dataManager: MockedDataStore()
     )

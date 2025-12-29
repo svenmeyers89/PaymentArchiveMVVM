@@ -18,7 +18,7 @@ final class PaymentArchiveViewModel {
     }
     if let selectedAccountId = state.selectedAccountId {
       let payments = state.payments[selectedAccountId] ?? []
-      return .listView(payments)
+      return .listView(payments, selectedAccountId: selectedAccountId)
     } else {
       return .onboarding
     }
