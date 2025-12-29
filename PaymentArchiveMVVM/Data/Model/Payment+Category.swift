@@ -11,7 +11,7 @@ import UIKit
 extension Payment {
   enum Category: String, CaseIterable, Sendable {
     case groceries
-    case accomodation
+    case accommodation
     case restaurantsAndBars
     case utilities
     case transport
@@ -23,7 +23,7 @@ extension Payment {
       switch self {
       case .groceries:
         return "basket"
-      case .accomodation:
+      case .accommodation:
         return "building"
       case .restaurantsAndBars:
         return "fork.knife"

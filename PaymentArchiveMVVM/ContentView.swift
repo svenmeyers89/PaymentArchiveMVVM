@@ -14,7 +14,7 @@ struct ContentView: View {
               payment: .init(
                 accountId: "1",
                 amount: 12.5,
-                category: .accomodation
+                category: .accommodation
               ),
               colors: .init(
                 background: .white,
