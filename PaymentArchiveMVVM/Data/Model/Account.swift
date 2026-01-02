@@ -12,7 +12,7 @@ struct Account: Equatable, Sendable {
   var selectedAt: TimeInterval
   var name: String
   var paymentIds: [String]
-  let currency: String
+  let currency: Currency
   var useBiometry: Bool
 
   init(
@@ -20,7 +20,7 @@ struct Account: Equatable, Sendable {
     selectedAt: TimeInterval = Date().timeIntervalSince1970,
     name: String,
     paymentIds: [String],
-    currency: String,
+    currency: Currency,
     useBiometry: Bool
   ) {
     self.id = id

@@ -7,20 +7,20 @@
 
 import SwiftUI
 
-struct PredefinedCurrencySelector: View {
-  let predefinedCurrencies: [PrederfinedCurrency]
+struct CurrencySelector: View {
+  let currencies: [Currency]
   let colors: Colors
-  let didSelectPredefinedCurrency: (PrederfinedCurrency) -> Void
+  let didSelectPredefinedCurrency: (Currency) -> Void
   
   var body: some View {
     HStack(spacing: 16) {
-      ForEach(PrederfinedCurrency.allCases, id: \.self) { currency in
+      ForEach(Currency.predefined, id: \.code) { currency in
         Button(action: {
           didSelectPredefinedCurrency(currency)
         }) {
           HStack {
             Spacer()
-            Text(currency.symbol)
+            Text(currency.code)
               .font(.headline)
               .foregroundStyle(colors.buttonText)
               .padding(.vertical, 8)
@@ -35,7 +35,7 @@ struct PredefinedCurrencySelector: View {
   }
 }
 
-extension PredefinedCurrencySelector {
+extension CurrencySelector {
   struct Colors {
     let background: Color
     let buttonBackground: Color
@@ -44,8 +44,8 @@ extension PredefinedCurrencySelector {
 }
 
 #Preview {
-  PredefinedCurrencySelector(
-    predefinedCurrencies: PrederfinedCurrency.allCases,
+  CurrencySelector(
+    currencies: Currency.predefined,
     colors: .init(background: .blue, buttonBackground: .yellow, buttonText: .green),
     didSelectPredefinedCurrency: { currency in
       print("Did select currency: \(currency)")

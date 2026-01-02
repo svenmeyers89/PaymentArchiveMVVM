@@ -11,7 +11,7 @@ struct Payment: Equatable, Sendable {
   let id: String
   let timestamp: TimeInterval
   let accountId: String
-  var amount: Float
+  var amountMinorUnits: Int
   var category: Category
   var note: String?
 
@@ -19,14 +19,14 @@ struct Payment: Equatable, Sendable {
     id: String = UUID().uuidString,
     timestamp: TimeInterval = Date().timeIntervalSince1970,
     accountId: String,
-    amount: Float,
+    amountMinorUnits: Int,
     category: Category,
     note: String? = nil
   ) {
     self.id = id
     self.timestamp = timestamp
     self.accountId = accountId
-    self.amount = amount
+    self.amountMinorUnits = amountMinorUnits
     self.category = category
     self.note = note
   }

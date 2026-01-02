@@ -39,17 +39,17 @@ struct EditAccountView: View {
             .padding(.horizontal, 8)
             
             VStack(spacing: 12) {
-              TextField("Currency", text: $viewModel.currency)
+              TextField("Currency", text: $viewModel.currencyCode)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .foregroundStyle(textFieldTextColor)
                 .disabled(viewModel.isEditingCurrencyDisabled)
 
               if !viewModel.isEditingCurrencyDisabled {
-                PredefinedCurrencySelector(
-                  predefinedCurrencies: PrederfinedCurrency.allCases,
-                  colors: predefinedCurrencySelectorColors
+                CurrencySelector(
+                  currencies: Currency.predefined,
+                  colors: currencySelectorColors
                 ) { selectedCurrency in
-                  viewModel.currency = selectedCurrency.rawValue
+                  viewModel.currencyCode = selectedCurrency.code
                 }
               }
             }
@@ -116,7 +116,7 @@ extension EditAccountView {
     theme.highlight.tint
   }
   
-  var predefinedCurrencySelectorColors: PredefinedCurrencySelector.Colors {
+  var currencySelectorColors: CurrencySelector.Colors {
     .init(
       background: theme.background.primary,
       buttonBackground: theme.selector.background,
@@ -128,7 +128,7 @@ extension EditAccountView {
 #Preview {
   let useCase: EditAccountUseCase =
     //.addNewAccount
-    .editAccount(.init(name: "Sven", paymentIds: [], currency: "EUR", useBiometry: true))
+    .editAccount(.init(name: "Sven", paymentIds: [], currency: Currency.eur, useBiometry: true))
   EditAccountView(
     viewModel: .init(
       useCase: useCase,

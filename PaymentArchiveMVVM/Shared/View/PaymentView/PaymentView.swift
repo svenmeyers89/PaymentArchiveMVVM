@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PaymentView: View {
   let payment: Payment
+  let currency: Currency
   let colors: Colors
   
   var body: some View {
@@ -20,9 +21,15 @@ struct PaymentView: View {
       )
       // Uses LabeledContent to get support for dynamic text
       LabeledContent {
-        Text("\(payment.amount)")
-          .font(.headline)
-          .foregroundStyle(colors.paymentAmount)
+        Text(
+          currency
+            .string(
+              from: payment.amountMinorUnits,
+              appendCurrencyCode: true
+            )
+        )
+        .font(.headline)
+        .foregroundStyle(colors.paymentAmount)
       } label: {
         VStack(alignment: .leading) {
           Text("\(payment.timestamp)")
@@ -51,8 +58,9 @@ extension PaymentView {
   List {
     PaymentView(
       payment: .init(
-        accountId: "1", amount: 12.5, category: .presents
+        accountId: "1", amountMinorUnits: 125, category: .presents
       ),
+      currency: Currency.gbp,
       colors: .init(
         background: .white,
         categoryIcon: .init(iconBackground: .white, iconTint: .blue),

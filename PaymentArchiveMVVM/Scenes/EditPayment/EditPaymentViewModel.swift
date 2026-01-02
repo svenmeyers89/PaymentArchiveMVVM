@@ -44,19 +44,19 @@ enum EditPaymentUseCase {
 
 @MainActor @Observable
 final class EditPaymentViewModel {
-  var amount: Float?
+  var amountMinorUnits: Int
   var category: Payment.Category?
   var note: String?
   
   private let useCase: EditPaymentUseCase
-  let currency: String
+  let currency: Currency
   let categories: [Payment.Category]
 
   nonisolated private let dataManager: EditPaymentDataManager
 
   init(
     useCase: EditPaymentUseCase,
-    currency: String,
+    currency: Currency,
     categories: [Payment.Category],
     dataManager: EditPaymentDataManager
   ) {
@@ -66,11 +66,11 @@ final class EditPaymentViewModel {
 
     switch useCase {
     case .addNewPayment:
-      self.amount = nil
+      self.amountMinorUnits = 0
       self.category = nil
       self.note = nil
     case .editPayment(let payment):
-      self.amount = payment.amount
+      self.amountMinorUnits = payment.amountMinorUnits
       self.category = payment.category
       self.note = payment.note
     }
@@ -79,7 +79,7 @@ final class EditPaymentViewModel {
   }
   
   func savePayment() async -> Result<Void, EditPaymentError> {
-    guard let amount, amount > 0.0 else {
+    guard amountMinorUnits > 0 else {
       return .failure(.moneyAmountCannotBeEmptyOrZero)
     }
     guard let category else {
@@ -90,12 +90,14 @@ final class EditPaymentViewModel {
       case .addNewPayment(let selectedAccountId):
         return .init(
           accountId: selectedAccountId,
-          amount: amount,
+          amountMinorUnits: amountMinorUnits,
           category: category,
           note: note
         )
       case .editPayment(let payment):
-        let updatedPayment = payment.updated(amount: amount, category: category, note: note)
+        let updatedPayment = payment.updated(
+          amountMinorUnits: amountMinorUnits, category: category, note: note
+        )
         return updatedPayment
       }
     }()
@@ -109,9 +111,9 @@ final class EditPaymentViewModel {
 }
 
 extension Payment {
-  func updated(amount: Float, category: Payment.Category, note: String?) -> Payment {
+  func updated(amountMinorUnits: Int, category: Payment.Category, note: String?) -> Payment {
     var updatedPayment = self
-    updatedPayment.amount = amount
+    updatedPayment.amountMinorUnits = amountMinorUnits
     updatedPayment.category = category
     updatedPayment.note = note
     return updatedPayment

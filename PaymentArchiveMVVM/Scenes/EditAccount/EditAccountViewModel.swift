@@ -42,7 +42,7 @@ final class EditAccountViewModel {
   private let dataManager: EditAccountDataManager
   
   var accountName: String
-  var currency: String
+  var currencyCode: String
   var useBiometry: Bool
 
   init(
@@ -55,11 +55,11 @@ final class EditAccountViewModel {
     switch useCase {
     case .addNewAccount:
       self.accountName = ""
-      self.currency = ""
+      self.currencyCode = ""
       self.useBiometry = false
     case .editAccount(let account):
       self.accountName = account.name
-      self.currency = account.currency
+      self.currencyCode = account.currency.code
       self.useBiometry = account.useBiometry
     }
   }
@@ -81,10 +81,10 @@ final class EditAccountViewModel {
     guard !accountName.isEmpty else {
       return .failure(EditAccountError.accountNameEmpty)
     }
-    guard !currency.isEmpty else {
+    guard !currencyCode.isEmpty else {
       return .failure(EditAccountError.currencyEmpty)
     }
-    guard currency.count == 3 else {
+    guard currencyCode.count == 3 else {
       return .failure(EditAccountError.currencyNotValid)
     }
 
@@ -95,7 +95,9 @@ final class EditAccountViewModel {
           return Account(
             name: accountName,
             paymentIds: [],
-            currency: currency.uppercased(),
+            currency:
+              Currency.getPredefined(withCode: currencyCode) ??
+              Currency(code: currencyCode, minorUnitExponent: 2), // TODO: Fix this!
             useBiometry: useBiometry
           )
         case .editAccount(let account):

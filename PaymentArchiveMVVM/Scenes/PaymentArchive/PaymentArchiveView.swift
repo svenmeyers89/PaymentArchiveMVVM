@@ -11,7 +11,11 @@ struct PaymentArchiveView: View {
   enum ContentType {
     case loading
     case onboarding
-    case listView([Payment], selectedAccountId: String)
+    case listView(
+      [Payment],
+      currency: Currency,
+      selectedAccountId: String
+    )
     case error(String)
   }
 
@@ -63,13 +67,14 @@ struct PaymentArchiveView: View {
               showDemoAction: { print("Show Demo!") }
             )
           )
-        case .listView(let payments, let selectedAccountId):
+        case .listView(let payments, let currency, let selectedAccountId):
           List(payments, id: \.id) { payment in
             Button(action: {
               presentedModal = .updatePayment(.editPayment(payment))
             }) {
               PaymentView(
                 payment: payment,
+                currency: currency,
                 colors: paymentViewColors
               )
               .frame(maxWidth: .infinity)

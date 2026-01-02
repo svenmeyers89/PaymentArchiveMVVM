@@ -28,7 +28,7 @@ extension SimplifiedDataStore {
       "4.6.2025. 10:12",
       "6.6.2025. 07:12"
     ]
-    let currency = "EUR"
+    let currency = Currency.eur
     
     let account1 = Account(
       id: account1Id, name: "Perica's account",
@@ -42,7 +42,7 @@ extension SimplifiedDataStore {
           id: $0,
           timestamp: $0.toDate()!.timeIntervalSince1970,
           accountId: account1Id,
-          amount: Float(arc4random() % 1000) / 100.0,
+          amountMinorUnits: Int(arc4random() % 1000),
           category: Payment.Category.allCases.randomElement()!
         )
       }

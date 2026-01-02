@@ -33,7 +33,7 @@ struct SceneFactory {
   func buildEditPaymentScene(useCase: EditPaymentUseCase) -> EditPaymentView {
     let viewModel = EditPaymentViewModel(
       useCase: useCase,
-      currency: paymentArchive.state?.selectedAccount?.currency ?? "",
+      currency: paymentArchive.state!.selectedAccount!.currency,
       categories: Payment.Category.allCases,
       dataManager: paymentArchive
     )
