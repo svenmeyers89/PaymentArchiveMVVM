@@ -40,7 +40,7 @@ extension SimplifiedDataStore: PersistenceStore {
       throw SimplifiedDataSourceError.accountNotFound(id: accountId)
     }
     let payments: [Payment] = account.paymentIds.compactMap { self.payments[$0] }
-    return payments
+    return payments.sorted(by: { $0.timestamp > $1.timestamp })
   }
 
   func saveAccount(_ account: Account) async throws {

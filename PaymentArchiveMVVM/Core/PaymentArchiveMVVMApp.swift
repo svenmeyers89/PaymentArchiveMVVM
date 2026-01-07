@@ -20,7 +20,7 @@ actor DependencyManager {
   
   @MainActor
   private lazy var paymentArchive: PaymentArchive = {
-    .init(persistanceStore: persistenceStore)
+    .init(persistanceStore: self.persistenceStore)
   }()
   
   @MainActor
@@ -30,6 +30,7 @@ actor DependencyManager {
 }
 
 extension DependencyManager {
+  static let swiftDataStore: DependencyManager = .init(persistenceStore: try! SwiftDataPersistenceStore())
   static let mockedWithEmptyStore: DependencyManager = .init(persistenceStore: SimplifiedDataStore.empty)
   static let mockedWithPopulatedStore: DependencyManager = .init(persistenceStore: SimplifiedDataStore.singleAccountWithMultiplePayments)
 }
@@ -38,7 +39,7 @@ extension DependencyManager {
 struct PaymentArchiveMVVMApp: App {
   @AppStorage(UserDefaultsKeys.selectedThemeID) private var selectedThemeID: String = Theme.defaultValue.rawValue
   
-  let dependencyManager: DependencyManager = .mockedWithEmptyStore
+  let dependencyManager: DependencyManager = .swiftDataStore // TODO: Fix this!
 
   var body: some Scene {
     WindowGroup {

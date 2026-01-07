@@ -7,56 +7,6 @@
 
 import Observation
 
-extension PaymentArchive {
-  struct State {
-    let selectedAccountId: String?
-    let accounts: [String: Account]
-    let payments: [String: [Payment]]
-
-    static let empty = State(selectedAccountId: nil, accounts: [:], payments: [:])
-    
-    var selectedAccount: Account? {
-      guard let selectedAccountId else {
-        return nil
-      }
-      return accounts[selectedAccountId]
-    }
-    
-    func updating(accounts: [Account]) -> State {
-      var updatedAccounts = self.accounts
-      accounts.forEach { account in
-        updatedAccounts[account.id] = account
-      }
-      return .init(
-        selectedAccountId: updatedAccounts.values.sorted(by: { $0.selectedAt > $1.selectedAt }).first?.id,
-        accounts: updatedAccounts,
-        payments: payments
-      )
-    }
-    
-    func updating(payments: [Payment]) -> State {
-      var updatedPayments = self.payments
-      payments.forEach { payment in
-        var accountPayments = updatedPayments[payment.accountId, default: []]
-
-        if let index = accountPayments.firstIndex(where: { $0.id == payment.id }) {
-          accountPayments[index] = payment
-        } else {
-          let insertionIndex = accountPayments.firstIndex { $0.timestamp < payment.timestamp } ?? 0
-          accountPayments.insert(payment, at: insertionIndex)
-        }
-        updatedPayments[payment.accountId] = accountPayments
-      }
-
-      return .init(
-        selectedAccountId: selectedAccountId,
-        accounts: accounts,
-        payments: updatedPayments
-      )
-    }
-  }
-}
-
 @MainActor @Observable
 final class PaymentArchive: Sendable {
   private(set) var state: State?
@@ -67,10 +17,23 @@ final class PaymentArchive: Sendable {
     self.persistanceStore = persistanceStore
   }
   
+  struct State {
+    fileprivate(set) var selectedAccountId: String?
+    fileprivate(set) var accounts: [String: Account]
+    fileprivate(set) var payments: [String: [Payment]]
+
+    static let empty = State(selectedAccountId: nil, accounts: [:], payments: [:])
+    
+    var selectedAccount: Account? {
+      guard let selectedAccountId else { return nil }
+      return accounts[selectedAccountId]
+    }
+  }
+  
   func loadInitialState() async throws {
     let accounts = try await persistanceStore.loadAllAccounts()
 
-    let selectedAccount = accounts.sorted(by: { $0.selectedAt > $1.selectedAt }).first
+    let selectedAccount: Account? = accounts.first
 
     let accountPayments: [Payment]
     if let selectedAccount {
@@ -78,7 +41,7 @@ final class PaymentArchive: Sendable {
     } else {
       accountPayments = []
     }
-    
+
     let payments: [String: [Payment]]
     if let selectedAccountId = selectedAccount?.id {
       payments = [selectedAccountId: accountPayments]
@@ -98,17 +61,21 @@ final class PaymentArchive: Sendable {
 extension PaymentArchive: EditPaymentDataManager {
   func save(payment: Payment) async throws {
     try await persistanceStore.savePayment(payment)
-    
-    let updatedState = self.state?.updating(payments: [payment])
+
+    let payments = try await persistanceStore.loadPayments(accountId: payment.accountId)
+
+    var updatedState: State? = self.state
+    updatedState?.payments[payment.accountId] = payments
     self.state = updatedState
   }
 }
- 
+
 extension PaymentArchive: EditAccountDataManager {
   func save(account: Account) async throws {
     try await persistanceStore.saveAccount(account)
 
-    let updatedState = self.state?.updating(accounts: [account])
+    var updatedState = self.state
+    updatedState?.accounts[account.id] = account
     self.state = updatedState
   }
 }
