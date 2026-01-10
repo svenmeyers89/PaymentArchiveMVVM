@@ -142,14 +142,22 @@ extension PaymentRecord: DomainModelRepresentable {
 }
 
 actor SwiftDataPersistenceStore {
-  private let context: ModelContext
+  private let container: ModelContainer
+  
+  /// Important:
+  /// If modelCotext is created on the main thread and called on the background thread, SwiftData complains!
+  /// This would happen if we initialized context in the actor's init.
+  /// Keep in mind that actor's init is performed on the caller's thread,
+  /// which is usually different than the thread assigned to the actor from the system.
+  private lazy var context: ModelContext = {
+    .init(container)
+  }()
   
   init(isStoredInMemoryOnly: Bool = false) throws {
-    let container = try ModelContainer(
+    self.container = try ModelContainer(
       for: AccountRecord.self, PaymentRecord.self,
       configurations: .init(isStoredInMemoryOnly: isStoredInMemoryOnly)
     )
-    self.context = ModelContext(container)
   }
 }
 
