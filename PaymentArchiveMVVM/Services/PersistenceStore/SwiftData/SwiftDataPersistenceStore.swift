@@ -13,14 +13,20 @@ enum SwiftDataPersistenceStoreError: Error {
   case invalidDataStoreState
 }
 
+protocol DomainModelDTO {
+  associatedtype DomainModel
+  init(domainModel: DomainModel)
+}
+
 protocol DomainModelRepresentable {
   associatedtype DomainModel
+  associatedtype DTO: DomainModelDTO where DTO.DomainModel == DomainModel
 
-  init(domain: DomainModel)
+  init(domain: DTO)
 
   // SwiftData is optimized for mutations, not churn.
   // That's why we rather update the existing model but to delete it and insert a new one
-  func update(with domain: DomainModel)
+  func update(with domain: DTO)
   
   func toDomain() throws -> DomainModel
 }
@@ -50,23 +56,42 @@ final class AccountRecord {
   }
 }
 
-extension AccountRecord: DomainModelRepresentable {
+struct AccountDTO: DomainModelDTO {
   typealias DomainModel = Account
   
-  convenience init(domain: Account) {
+  let id: String
+  let selectedAt: TimeInterval
+  let name: String
+  let currencyCode: String
+  let useBiometry: Bool
+  
+  init(domainModel: Account) {
+    self.id = domainModel.id
+    self.selectedAt = domainModel.selectedAt
+    self.name = domainModel.name
+    self.currencyCode = domainModel.currency.code
+    self.useBiometry = domainModel.useBiometry
+  }
+}
+
+extension AccountRecord: DomainModelRepresentable {
+  typealias DomainModel = Account
+  typealias DTO = AccountDTO
+  
+  convenience init(domain: AccountDTO) {
     self.init(
       id: domain.id,
       selectedAt: domain.selectedAt,
       name: domain.name,
-      currencyCode: domain.currency.code,
+      currencyCode: domain.currencyCode,
       useBiometry: domain.useBiometry
     )
   }
   
-  func update(with domain: Account) {
+  func update(with domain: AccountDTO) {
     self.selectedAt = domain.selectedAt
     self.name = domain.name
-    self.currencyCode = domain.currency.code
+    self.currencyCode = domain.currencyCode
     self.useBiometry = domain.useBiometry
   }
   
@@ -110,23 +135,42 @@ final class PaymentRecord {
   }
 }
 
-extension PaymentRecord: DomainModelRepresentable {
+struct PaymentDTO: DomainModelDTO {
   typealias DomainModel = Payment
   
-  convenience init(domain: Payment) {
+  let id: String
+  let timestamp: TimeInterval
+  let amountMinorUnits: Int
+  let category: String
+  let note: String?
+  
+  init(domainModel: Payment) {
+    self.id = domainModel.id
+    self.timestamp = domainModel.timestamp
+    self.amountMinorUnits = domainModel.amountMinorUnits
+    self.category = domainModel.category.rawValue
+    self.note = domainModel.note
+  }
+}
+
+extension PaymentRecord: DomainModelRepresentable {
+  typealias DomainModel = Payment
+  typealias DTO = PaymentDTO
+  
+  convenience init(domain: PaymentDTO) {
     self.init(
       id: domain.id,
       timestamp: domain.timestamp,
       amountMinorUnits: domain.amountMinorUnits,
-      category: domain.category.rawValue,
+      category: domain.category,
       note: domain.note
     )
   }
 
-  func update(with domain: Payment) {
+  func update(with domain: PaymentDTO) {
     self.timestamp = domain.timestamp
     self.amountMinorUnits = domain.amountMinorUnits
-    self.category = domain.category.rawValue
+    self.category = domain.category
     self.note = domain.note
   }
   
@@ -182,10 +226,11 @@ extension SwiftDataPersistenceStore: PersistenceStore {
   }
   
   func saveAccount(_ account: Account) async throws {
+    let accountDto = AccountDTO(domainModel: account)
     if let existingAccountRecord = try loadAccountRecord(accountId: account.id) {
-      existingAccountRecord.update(with: account)
+      existingAccountRecord.update(with: accountDto)
     } else {
-      let accountRecord = AccountRecord(domain: account)
+      let accountRecord = AccountRecord(domain: accountDto)
       context.insert(accountRecord)
     }
 
@@ -193,13 +238,14 @@ extension SwiftDataPersistenceStore: PersistenceStore {
   }
   
   func savePayment(_ payment: Payment) async throws {
+    let paymentDTO = PaymentDTO(domainModel: payment)
     if let existingPaymentRecord = try loadPaymentRecords(paymentIds: [payment.id]).first {
-      existingPaymentRecord.update(with: payment)
+      existingPaymentRecord.update(with: paymentDTO)
     } else {
       guard let accountRecord = try loadAccountRecord(accountId: payment.accountId) else {
         throw SwiftDataPersistenceStoreError.invalidDataStoreState
       }
-      let paymentRecord = PaymentRecord(domain: payment)
+      let paymentRecord = PaymentRecord(domain: paymentDTO)
       // Since these are inverse relationships, only one of two two following lines is enough
       // Leaving both for clarity
       accountRecord.payments.append(paymentRecord)
