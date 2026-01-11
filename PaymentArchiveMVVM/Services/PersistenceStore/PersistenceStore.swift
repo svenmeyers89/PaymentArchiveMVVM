@@ -12,4 +12,6 @@ protocol PersistenceStore: Sendable {
   func loadPayments(accountId: String) async throws -> [Payment]
   func saveAccount(_ account: Account) async throws
   func savePayment(_ payment: Payment) async throws
+  func deleteAccount(accountId: String) async throws
+  func deletePayments(paymentIds: [String]) async throws
 }

@@ -56,4 +56,18 @@ extension SimplifiedDataStore: PersistenceStore {
     }
     accounts[account.id] = account
   }
+  
+  func deleteAccount(accountId: String) async throws {
+    let accountPayments = try await loadPayments(accountId: accountId)
+    self.accounts[accountId] = nil
+    for payment in accountPayments {
+      self.payments.removeValue(forKey: payment.id)
+    }
+  }
+  
+  func deletePayments(paymentIds: [String]) async throws {
+    for paymentId in paymentIds {
+      self.payments.removeValue(forKey: paymentId)
+    }
+  }
 }

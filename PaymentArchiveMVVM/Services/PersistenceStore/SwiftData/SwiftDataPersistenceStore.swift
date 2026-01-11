@@ -15,8 +15,13 @@ enum SwiftDataPersistenceStoreError: Error {
 
 protocol DomainModelRepresentable {
   associatedtype DomainModel
+
   init(domain: DomainModel)
+
+  // SwiftData is optimized for mutations, not churn.
+  // That's why we rather update the existing model but to delete it and insert a new one
   func update(with domain: DomainModel)
+  
   func toDomain() throws -> DomainModel
 }
 
@@ -188,7 +193,7 @@ extension SwiftDataPersistenceStore: PersistenceStore {
   }
   
   func savePayment(_ payment: Payment) async throws {
-    if let existingPaymentRecord = try loadPaymentRecord(paymentId: payment.id) {
+    if let existingPaymentRecord = try loadPaymentRecords(paymentIds: [payment.id]).first {
       existingPaymentRecord.update(with: payment)
     } else {
       guard let accountRecord = try loadAccountRecord(accountId: payment.accountId) else {
@@ -205,6 +210,33 @@ extension SwiftDataPersistenceStore: PersistenceStore {
     try context.save()
   }
   
+  func deleteAccount(accountId: String) async throws {
+    guard let accountRecord = try loadAccountRecord(accountId: accountId) else {
+      print("SwiftDataPersistenceStore: Account \(accountId) not found")
+      return
+    }
+    
+    // Deleting account like this will also delete all related payments
+    // This happens automatically due to the .cascade attribute of the account->payments relationship
+    context.delete(accountRecord)
+    
+    try context.save()
+  }
+
+  func deletePayments(paymentIds: [String]) async throws {
+    guard !paymentIds.isEmpty else { return }
+
+    let paymentRecords = try loadPaymentRecords(paymentIds: paymentIds)
+
+    // Deleting payments like this automatically removes them from the related account's payments collection
+    // SwiftData maintains inverse relationship consistency for managed models
+    for payment in paymentRecords {
+      context.delete(payment)
+    }
+
+    try context.save()
+  }
+  
   // MARK: Helper
   
   private func loadAccountRecord(accountId: String) throws -> AccountRecord? {
@@ -212,13 +244,15 @@ extension SwiftDataPersistenceStore: PersistenceStore {
     return try context.fetch(fetchAccount).first
   }
   
-  private func loadPaymentRecord(paymentId: String) throws -> PaymentRecord? {
+  private func loadPaymentRecords(paymentIds: [String]) throws -> [PaymentRecord] {
     let descriptor = FetchDescriptor<PaymentRecord>(
-      predicate: #Predicate { $0.id == paymentId }
+      predicate: #Predicate { payment in
+        paymentIds.contains(payment.id)
+      }
     )
     
     let paymentRecords = try context.fetch(descriptor)
-    return paymentRecords.first
+    return paymentRecords
   }
   
   private func loadPaymentRecords(accountId: String) throws -> [PaymentRecord] {
