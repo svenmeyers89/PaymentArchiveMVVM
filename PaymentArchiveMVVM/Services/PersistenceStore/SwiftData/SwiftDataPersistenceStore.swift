@@ -34,7 +34,7 @@ protocol DomainModelRepresentable {
 @Model
 final class AccountRecord {
   @Attribute(.unique) var id: String
-  var selectedAt: TimeInterval
+  var selectedAt: Date
   var name: String
   var currencyCode: String
   var useBiometry: Bool
@@ -43,7 +43,7 @@ final class AccountRecord {
   
   init(
     id: String,
-    selectedAt: TimeInterval,
+    selectedAt: Date,
     name: String,
     currencyCode: String,
     useBiometry: Bool
@@ -60,7 +60,7 @@ struct AccountDTO: DomainModelDTO {
   typealias DomainModel = Account
   
   let id: String
-  let selectedAt: TimeInterval
+  let selectedAt: Date
   let name: String
   let currencyCode: String
   let useBiometry: Bool
@@ -113,7 +113,7 @@ extension AccountRecord: DomainModelRepresentable {
 @Model
 final class PaymentRecord {
   @Attribute(.unique) var id: String
-  var timestamp: TimeInterval
+  var createdAt: Date
   var amountMinorUnits: Int
   var category: String
   var note: String?
@@ -122,13 +122,13 @@ final class PaymentRecord {
   
   init(
     id: String,
-    timestamp: TimeInterval,
+    createdAt: Date,
     amountMinorUnits: Int,
     category: String,
     note: String? = nil
   ) {
     self.id = id
-    self.timestamp = timestamp
+    self.createdAt = createdAt
     self.amountMinorUnits = amountMinorUnits
     self.category = category
     self.note = note
@@ -139,14 +139,14 @@ struct PaymentDTO: DomainModelDTO {
   typealias DomainModel = Payment
   
   let id: String
-  let timestamp: TimeInterval
+  let createdAt: Date
   let amountMinorUnits: Int
   let category: String
   let note: String?
   
   init(domainModel: Payment) {
     self.id = domainModel.id
-    self.timestamp = domainModel.timestamp
+    self.createdAt = domainModel.createdAt
     self.amountMinorUnits = domainModel.amountMinorUnits
     self.category = domainModel.category.rawValue
     self.note = domainModel.note
@@ -160,7 +160,7 @@ extension PaymentRecord: DomainModelRepresentable {
   convenience init(domain: PaymentDTO) {
     self.init(
       id: domain.id,
-      timestamp: domain.timestamp,
+      createdAt: domain.createdAt,
       amountMinorUnits: domain.amountMinorUnits,
       category: domain.category,
       note: domain.note
@@ -168,7 +168,7 @@ extension PaymentRecord: DomainModelRepresentable {
   }
 
   func update(with domain: PaymentDTO) {
-    self.timestamp = domain.timestamp
+    self.createdAt = domain.createdAt
     self.amountMinorUnits = domain.amountMinorUnits
     self.category = domain.category
     self.note = domain.note
@@ -181,7 +181,7 @@ extension PaymentRecord: DomainModelRepresentable {
     }
     return .init(
       id: id,
-      timestamp: timestamp,
+      createdAt: createdAt,
       accountId: accountRecord.id,
       amountMinorUnits: amountMinorUnits,
       category: category,
@@ -304,7 +304,7 @@ extension SwiftDataPersistenceStore: PersistenceStore {
   private func loadPaymentRecords(accountId: String) throws -> [PaymentRecord] {
     let descriptor = FetchDescriptor<PaymentRecord>(
       predicate: #Predicate { $0.account?.id == accountId },
-      sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+      sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
     )
 
     let paymentRecords = try context.fetch(descriptor)

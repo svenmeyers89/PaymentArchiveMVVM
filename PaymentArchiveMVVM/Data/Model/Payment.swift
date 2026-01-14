@@ -9,7 +9,7 @@ import Foundation
 
 struct Payment: Equatable, Sendable {
   let id: String
-  let timestamp: TimeInterval
+  let createdAt: Date
   let accountId: String
   var amountMinorUnits: Int
   var category: Category
@@ -17,14 +17,14 @@ struct Payment: Equatable, Sendable {
 
   init(
     id: String = UUID().uuidString,
-    timestamp: TimeInterval = Date().timeIntervalSince1970,
+    createdAt: Date = Date(),
     accountId: String,
     amountMinorUnits: Int,
     category: Category,
     note: String? = nil
   ) {
     self.id = id
-    self.timestamp = timestamp
+    self.createdAt = createdAt
     self.accountId = accountId
     self.amountMinorUnits = amountMinorUnits
     self.category = category

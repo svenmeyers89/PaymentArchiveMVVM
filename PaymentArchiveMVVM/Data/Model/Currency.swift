@@ -41,7 +41,7 @@ extension Currency {
   private var numberStyle: FloatingPointFormatStyle<Double> {
     .number
     .precision(.fractionLength(minorUnitExponent))
-    .locale(.current)
+    .locale(Locale.appLocale)
   }
   
   private var currencyCodeStyle: FloatingPointFormatStyle<Double>.Currency {

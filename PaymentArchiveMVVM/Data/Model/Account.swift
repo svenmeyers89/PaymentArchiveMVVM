@@ -9,7 +9,7 @@ import Foundation
 
 struct Account: Equatable, Sendable {
   let id: String
-  var selectedAt: TimeInterval
+  var selectedAt: Date
   var name: String
   var paymentIds: [String]
   let currency: Currency
@@ -17,7 +17,7 @@ struct Account: Equatable, Sendable {
 
   init(
     id: String = UUID().uuidString,
-    selectedAt: TimeInterval = Date().timeIntervalSince1970,
+    selectedAt: Date = Date(),
     name: String,
     paymentIds: [String],
     currency: Currency,

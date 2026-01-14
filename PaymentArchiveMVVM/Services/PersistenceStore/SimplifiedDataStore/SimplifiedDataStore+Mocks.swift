@@ -40,7 +40,7 @@ extension SimplifiedDataStore {
       .map {
         Payment(
           id: $0,
-          timestamp: $0.toDate()!.timeIntervalSince1970,
+          createdAt: $0.toDate(),
           accountId: account1Id,
           amountMinorUnits: Int(arc4random() % 1000),
           category: Payment.Category.allCases.randomElement()!
@@ -57,8 +57,8 @@ fileprivate let dataFormatter = {
   return formatter
 }()
 
-extension String {
-  func toDate() -> Date? {
-    return dataFormatter.date(from: self)
+fileprivate extension String {
+  func toDate() -> Date {
+    return dataFormatter.date(from: self)!
   }
 }
