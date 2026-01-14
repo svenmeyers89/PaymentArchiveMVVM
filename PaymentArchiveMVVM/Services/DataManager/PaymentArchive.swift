@@ -9,25 +9,18 @@ import Observation
 
 @MainActor @Observable
 final class PaymentArchive: Sendable {
-  private(set) var state: State?
-  
-  private let persistanceStore: PersistenceStore
-  
-  init(persistanceStore: PersistenceStore) {
-    self.persistanceStore = persistanceStore
-  }
-  
   struct State {
     fileprivate(set) var selectedAccountId: String?
     fileprivate(set) var accounts: [String: Account]
     fileprivate(set) var payments: [String: [Payment]]
+  }
 
-    static let empty = State(selectedAccountId: nil, accounts: [:], payments: [:])
-    
-    var selectedAccount: Account? {
-      guard let selectedAccountId else { return nil }
-      return accounts[selectedAccountId]
-    }
+  private(set) var state: State?
+
+  private let persistanceStore: PersistenceStore
+  
+  init(persistanceStore: PersistenceStore) {
+    self.persistanceStore = persistanceStore
   }
   
   func loadInitialState() async throws {

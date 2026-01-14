@@ -35,7 +35,7 @@ struct PaymentView: View {
           Text("\(payment.createdAt.formatted(DateStyle.dateTime))")
             .font(.headline)
             .foregroundStyle(colors.paymentDateTime)
-          Text("\(payment.category.name)")
+          Text("\(payment.category.rawValue)")
             .font(.caption)
             .foregroundStyle(colors.categoryName)
         }

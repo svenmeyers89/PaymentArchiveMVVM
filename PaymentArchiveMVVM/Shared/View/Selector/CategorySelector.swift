@@ -25,7 +25,7 @@ struct CategorySelector: View {
                 side: 20,
                 colors: colors.categoryIcon
               )
-              Text(category.name)
+              Text(category.rawValue)
                 .font(.caption)
                 .foregroundStyle(colors.categoryTitle)
                 .lineLimit(2)

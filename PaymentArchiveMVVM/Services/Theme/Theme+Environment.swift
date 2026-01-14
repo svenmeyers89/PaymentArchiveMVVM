@@ -1,31 +1,13 @@
 //
-//  ColorPalette+Environment.swift
+//  Theme+Environment.swift
 //  PaymentArchiveMVVM
 //
-//  Created by Sven Majeric on 20.08.2025..
+//  Created by Sven Majeric on 14.01.2026..
 //
 
 import SwiftUI
 
-@MainActor
-@dynamicMemberLookup
-enum Theme: String, CaseIterable {
-  case system
-  case custom
-  
-  var colorPalette: ColorPalette {
-    switch self {
-    case .system:
-      return ColorPalette.system
-    case .custom:
-      return ColorPalette.custom
-    }
-  }
-  
-  subscript<T>(dynamicMember keyPath: KeyPath<ColorPalette, T>) -> T {
-    colorPalette[keyPath: keyPath]
-  }
-}
+private typealias ThemeIDKey = Theme
 
 @MainActor
 extension Theme: @preconcurrency EnvironmentKey {
@@ -44,8 +26,6 @@ extension EnvironmentValues {
     set { self[SetThemeIDKey.self] = newValue }
   }
 }
-
-private typealias ThemeIDKey = Theme
 
 @MainActor
 private struct SetThemeIDKey: @preconcurrency EnvironmentKey {
