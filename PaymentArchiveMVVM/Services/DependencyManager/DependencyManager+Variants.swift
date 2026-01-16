@@ -6,7 +6,7 @@
 //
 
 extension DependencyManager {
-  static let swiftDataStore: DependencyManager = .init(persistenceStore: try! SwiftDataPersistenceStore())
+  static let live: DependencyManager = .init(persistenceStore: try! SwiftDataPersistenceStore())
   static let mockedWithEmptyStore: DependencyManager = .init(persistenceStore: SimplifiedDataStore.empty)
   static let mockedWithPopulatedStore: DependencyManager = .init(persistenceStore: SimplifiedDataStore.singleAccountWithMultiplePayments)
 }

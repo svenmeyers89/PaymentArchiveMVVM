@@ -15,7 +15,7 @@ struct UserDefaultsKeys {
 struct PaymentArchiveMVVMApp: App {
   @AppStorage(UserDefaultsKeys.selectedThemeID) private var selectedThemeID: String = Theme.defaultValue.rawValue
   
-  let dependencyManager: DependencyManager = .swiftDataStore // TODO: Fix this!
+  let dependencyManager: DependencyManager = .live
 
   var body: some Scene {
     WindowGroup {
