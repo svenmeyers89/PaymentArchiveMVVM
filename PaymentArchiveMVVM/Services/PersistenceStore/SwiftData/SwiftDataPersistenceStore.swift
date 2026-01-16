@@ -35,11 +35,7 @@ actor SwiftDataPersistenceStore {
 
 extension SwiftDataPersistenceStore: PersistenceStore {
   func loadAllAccounts() async throws -> [Account] {
-    let descriptor = FetchDescriptor<AccountRecord>(
-      sortBy: [SortDescriptor(\.selectedAt, order: .reverse)]
-    )
-
-    let accountRecords = try context.fetch(descriptor)
+    let accountRecords = try loadAllAccountRecords()
     return try accountRecords.map { try $0.toDomain() }
   }
   
@@ -107,6 +103,13 @@ extension SwiftDataPersistenceStore: PersistenceStore {
   }
   
   // MARK: Helper
+  
+  private func loadAllAccountRecords() throws -> [AccountRecord] {
+    let descriptor = FetchDescriptor<AccountRecord>(
+      sortBy: [SortDescriptor(\.selectedAt, order: .reverse)]
+    )
+    return try context.fetch(descriptor)
+  }
   
   private func loadAccountRecord(accountId: String) throws -> AccountRecord? {
     let fetchAccount = FetchDescriptor<AccountRecord>(predicate: #Predicate { accountId == $0.id })
