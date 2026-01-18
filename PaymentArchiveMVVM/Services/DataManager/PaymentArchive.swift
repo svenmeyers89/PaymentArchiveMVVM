@@ -69,6 +69,9 @@ extension PaymentArchive: EditAccountDataManager {
 
     var updatedState = self.state
     updatedState?.accounts[account.id] = account
+    if updatedState?.accounts.count == 1 {
+      updatedState?.selectedAccountId = account.id
+    }
     self.state = updatedState
   }
 }
