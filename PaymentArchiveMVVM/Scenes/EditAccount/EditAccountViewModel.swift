@@ -94,7 +94,6 @@ final class EditAccountViewModel {
         case .addNewAccount:
           return Account(
             name: accountName,
-            paymentIds: [],
             currency:
               Currency.getPredefined(withCode: currencyCode) ??
               Currency(code: currencyCode, minorUnitExponent: 2), // TODO: Fix this!

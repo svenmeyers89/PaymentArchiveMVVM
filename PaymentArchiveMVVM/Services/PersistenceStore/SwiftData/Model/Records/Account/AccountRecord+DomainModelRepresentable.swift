@@ -34,7 +34,6 @@ extension AccountRecord: DomainModelRepresentable {
       id: id,
       selectedAt: selectedAt,
       name: name,
-      paymentIds: payments.map(\.self.id),
       currency: currency,
       useBiometry: useBiometry
     )

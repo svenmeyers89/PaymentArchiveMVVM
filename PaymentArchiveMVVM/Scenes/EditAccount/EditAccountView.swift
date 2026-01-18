@@ -128,7 +128,7 @@ extension EditAccountView {
 #Preview {
   let useCase: EditAccountUseCase =
     //.addNewAccount
-    .editAccount(.init(name: "Sven", paymentIds: [], currency: Currency.eur, useBiometry: true))
+    .editAccount(.init(name: "Sven", currency: Currency.eur, useBiometry: true))
   EditAccountView(
     viewModel: .init(
       useCase: useCase,

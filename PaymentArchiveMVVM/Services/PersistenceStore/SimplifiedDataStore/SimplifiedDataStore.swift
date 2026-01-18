@@ -12,20 +12,16 @@ enum SimplifiedDataSourceError: Error {
 }
 
 actor SimplifiedDataStore {
-  private var accounts: [String: Account] = [:]
-  private var payments: [String: Payment] = [:]
+  private var accounts: [String: Account] = [:] // // accountId -> Account
+  private var payments: [String: [String: Payment]] = [:] // accountId -> Payments
   
-  init(accounts: [Account], payments: [Payment]) {
+  init(accounts: [Account], payments: [String: [String: Payment]]) {
     self.accounts = accounts.reduce([:], { partialResult, account in
       var updatedDict = partialResult
       updatedDict[account.id] = account
       return updatedDict
     })
-    self.payments = payments.reduce([:], { partialResult, payment in
-      var updatedDict = partialResult
-      updatedDict[payment.id] = payment
-      return updatedDict
-    })
+    self.payments = payments
   }
 }
 
@@ -36,11 +32,8 @@ extension SimplifiedDataStore: PersistenceStore {
   }
 
   func loadPayments(accountId: String) async throws -> [Payment] {
-    guard let account = accounts[accountId] else {
-      throw SimplifiedDataSourceError.accountNotFound(id: accountId)
-    }
-    let payments: [Payment] = account.paymentIds.compactMap { self.payments[$0] }
-    return payments.sorted(by: { $0.createdAt > $1.createdAt })
+    let payments: [String: Payment] = payments[accountId] ?? [:]
+    return payments.values.sorted(by: { $0.createdAt > $1.createdAt })
   }
 
   func saveAccount(_ account: Account) async throws {
@@ -48,26 +41,24 @@ extension SimplifiedDataStore: PersistenceStore {
   }
 
   func savePayment(_ payment: Payment) async throws {
-    guard var account = accounts[payment.accountId] else {
-      throw SimplifiedDataSourceError.accountNotFound(id: payment.accountId)
-    }
-    if !account.paymentIds.contains(where: { $0 == payment.id }) {
-      account.paymentIds.append(payment.id)
-    }
-    accounts[account.id] = account
+    var accountPayments: [String: Payment] = payments[payment.accountId] ?? [:]
+    accountPayments[payment.id] = payment
+    self.payments[payment.accountId] = accountPayments
   }
   
   func deleteAccount(accountId: String) async throws {
-    let accountPayments = try await loadPayments(accountId: accountId)
     self.accounts[accountId] = nil
-    for payment in accountPayments {
-      self.payments.removeValue(forKey: payment.id)
-    }
+    self.payments.removeValue(forKey: accountId)
   }
   
   func deletePayments(paymentIds: [String]) async throws {
-    for paymentId in paymentIds {
-      self.payments.removeValue(forKey: paymentId)
+    var updatedPaymnets: [String: [String: Payment]] = [:]
+    for var (accountId, accountPayments) in payments {
+      for paymentId in paymentIds {
+        accountPayments.removeValue(forKey: paymentId)
+      }
+      updatedPaymnets[accountId] = accountPayments
     }
+    payments = updatedPaymnets
   }
 }

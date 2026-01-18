@@ -8,7 +8,7 @@
 import Foundation
 
 extension SimplifiedDataStore {
-  static let empty = SimplifiedDataStore(accounts: [], payments: [])
+  static let empty = SimplifiedDataStore(accounts: [], payments: [:])
 
   static let singleAccountWithMultiplePayments: SimplifiedDataStore = {
     let account1Id = "1"
@@ -32,22 +32,26 @@ extension SimplifiedDataStore {
     
     let account1 = Account(
       id: account1Id, name: "Perica's account",
-      paymentIds: paymentTimestamps,
       currency: currency,
       useBiometry: false
     )
-    let payments = paymentTimestamps
-      .map {
-        Payment(
-          id: $0,
-          createdAt: $0.toDate(),
+    let payments: [String: Payment] = paymentTimestamps
+      .reduce([:], { partialResult, paymentTimestamp in
+        var updatedResult = partialResult
+        updatedResult[paymentTimestamp] = Payment(
+          id: paymentTimestamp,
+          createdAt: paymentTimestamp.toDate(),
           accountId: account1Id,
           amountMinorUnits: Int(arc4random() % 1000),
           category: Payment.Category.allCases.randomElement()!
         )
-      }
+        return updatedResult
+      })
    
-    return SimplifiedDataStore(accounts: [account1], payments: payments)
+    return SimplifiedDataStore(
+      accounts: [account1],
+      payments: [account1.id: payments]
+    )
   }()
 }
 
