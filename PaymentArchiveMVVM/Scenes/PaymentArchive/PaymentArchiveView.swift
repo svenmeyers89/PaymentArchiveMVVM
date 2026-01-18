@@ -11,13 +11,17 @@ struct PaymentArchiveView: View {
   enum ContentType {
     case loading
     case onboarding
-    case listView([Payment])
+    case listView(
+      [Payment],
+      currency: Currency,
+      selectedAccountId: String
+    )
     case error(String)
   }
 
   private enum Modal {
-    case updateAccount(Account?)
-    case updatePayment(Payment?)
+    case updateAccount(EditAccountUseCase)
+    case updatePayment(EditPaymentUseCase)
     case changeTheme
   }
 
@@ -58,18 +62,19 @@ struct PaymentArchiveView: View {
             colors: emptyArchiveViewColors,
             configuration: .onboarding(
               createAccountAction: {
-                presentedModal = .updateAccount(nil)
+                presentedModal = .updateAccount(.addNewAccount)
               },
               showDemoAction: { print("Show Demo!") }
             )
           )
-        case .listView(let payments):
+        case .listView(let payments, let currency, let selectedAccountId):
           List(payments, id: \.id) { payment in
             Button(action: {
-              presentedModal = .updatePayment(payment)
+              presentedModal = .updatePayment(.editPayment(payment))
             }) {
               PaymentView(
                 payment: payment,
+                currency: currency,
                 colors: paymentViewColors
               )
               .frame(maxWidth: .infinity)
@@ -82,7 +87,9 @@ struct PaymentArchiveView: View {
               size: 70, iconName: "plus",
               colors: circleButtonColors
             ) {
-              presentedModal = .updatePayment(nil)
+              presentedModal = .updatePayment(
+                .addNewPayment(selectedAccountId: selectedAccountId)
+              )
             }
           }
         }
@@ -106,12 +113,12 @@ struct PaymentArchiveView: View {
         )
       ) {
         switch presentedModal {
-        case .updateAccount(let account):
+        case .updateAccount(let useCase):
           sceneFactory?
-            .buildEditAccountScene(account: account)
-        case .updatePayment(let payment):
+            .buildEditAccountScene(useCase: useCase)
+        case .updatePayment(let useCase):
           sceneFactory?
-            .buildEditPaymentScene(payment: payment)
+            .buildEditPaymentScene(useCase: useCase)
         case .changeTheme:
           ChangeThemeView()
         default:

@@ -31,28 +31,46 @@ enum EditAccountError: Error {
   }
 }
 
+enum EditAccountUseCase {
+  case addNewAccount
+  case editAccount(Account)
+}
+
 @MainActor @Observable
 final class EditAccountViewModel {
-  private let edittedAccount: Account?
+  private let useCase: EditAccountUseCase
   private let dataManager: EditAccountDataManager
   
   var accountName: String
-  var currency: String
+  var currencyCode: String
   var useBiometry: Bool
 
   init(
-    edittedAccount: Account?,
+    useCase: EditAccountUseCase,
     dataManager: EditAccountDataManager
   ) {
-    self.edittedAccount = edittedAccount
+    self.useCase = useCase
     self.dataManager = dataManager
-    self.accountName = edittedAccount?.name ?? ""
-    self.currency = edittedAccount?.currency ?? ""
-    self.useBiometry = edittedAccount?.useBiometry ?? false
+    
+    switch useCase {
+    case .addNewAccount:
+      self.accountName = ""
+      self.currencyCode = ""
+      self.useBiometry = false
+    case .editAccount(let account):
+      self.accountName = account.name
+      self.currencyCode = account.currency.code
+      self.useBiometry = account.useBiometry
+    }
   }
   
   var isEdittingExistingAccount: Bool {
-    edittedAccount != nil
+    switch useCase {
+    case .addNewAccount:
+      return false
+    case .editAccount:
+      return true
+    }
   }
   
   var isEditingCurrencyDisabled: Bool {
@@ -63,24 +81,42 @@ final class EditAccountViewModel {
     guard !accountName.isEmpty else {
       return .failure(EditAccountError.accountNameEmpty)
     }
-    guard !currency.isEmpty else {
+    guard !currencyCode.isEmpty else {
       return .failure(EditAccountError.currencyEmpty)
     }
-    guard currency.count == 3 else {
+    guard currencyCode.count == 3 else {
       return .failure(EditAccountError.currencyNotValid)
     }
 
     do {
-      let account = Account(
-        name: accountName,
-        paymentIds: [],
-        currency: currency.uppercased(),
-        useBiometry: useBiometry
-      )
-      try await dataManager.save(account: account)
+      let updatedAccount: Account = {
+        switch useCase {
+        case .addNewAccount:
+          return Account(
+            name: accountName,
+            currency:
+              Currency.getPredefined(withCode: currencyCode) ??
+              Currency(code: currencyCode, minorUnitExponent: 2), // TODO: Fix this!
+            useBiometry: useBiometry
+          )
+        case .editAccount(let account):
+          let updatedAccount = account.updatedAccount(name: accountName, useBiometry: useBiometry)
+          return updatedAccount
+        }
+      }()
+      try await dataManager.save(account: updatedAccount)
       return .success(())
     } catch {
       return .failure(.saveAccountFailed(error))
     }
+  }
+}
+
+fileprivate extension Account {
+  func updatedAccount(name: String, useBiometry: Bool) -> Account {
+    var account = self
+    account.name = name
+    account.useBiometry = useBiometry
+    return account
   }
 }

@@ -8,7 +8,7 @@
 import Foundation
 
 extension SimplifiedDataStore {
-  static let empty = SimplifiedDataStore(accounts: [], payments: [])
+  static let empty = SimplifiedDataStore(accounts: [], payments: [:])
 
   static let singleAccountWithMultiplePayments: SimplifiedDataStore = {
     let account1Id = "1"
@@ -28,26 +28,30 @@ extension SimplifiedDataStore {
       "4.6.2025. 10:12",
       "6.6.2025. 07:12"
     ]
-    let currency = "EUR"
+    let currency = Currency.eur
     
     let account1 = Account(
       id: account1Id, name: "Perica's account",
-      paymentIds: paymentTimestamps,
       currency: currency,
       useBiometry: false
     )
-    let payments = paymentTimestamps
-      .map {
-        Payment(
-          id: $0,
-          timestamp: $0.toDate()!.timeIntervalSince1970,
+    let payments: [String: Payment] = paymentTimestamps
+      .reduce([:], { partialResult, paymentTimestamp in
+        var updatedResult = partialResult
+        updatedResult[paymentTimestamp] = Payment(
+          id: paymentTimestamp,
+          createdAt: paymentTimestamp.toDate(),
           accountId: account1Id,
-          amount: Float(arc4random() % 1000) / 100.0,
+          amountMinorUnits: Int(arc4random() % 1000),
           category: Payment.Category.allCases.randomElement()!
         )
-      }
+        return updatedResult
+      })
    
-    return SimplifiedDataStore(accounts: [account1], payments: payments)
+    return SimplifiedDataStore(
+      accounts: [account1],
+      payments: [account1.id: payments]
+    )
   }()
 }
 
@@ -57,8 +61,8 @@ fileprivate let dataFormatter = {
   return formatter
 }()
 
-extension String {
-  func toDate() -> Date? {
-    return dataFormatter.date(from: self)
+fileprivate extension String {
+  func toDate() -> Date {
+    return dataFormatter.date(from: self)!
   }
 }

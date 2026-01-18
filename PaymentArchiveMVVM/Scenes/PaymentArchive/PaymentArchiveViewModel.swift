@@ -16,9 +16,13 @@ final class PaymentArchiveViewModel {
     guard let state = paymentArchive.state else {
       return .loading
     }
-    if let selectedAccountId = state.selectedAccountId {
-      let payments = state.payments[selectedAccountId] ?? []
-      return .listView(payments)
+    if let selectedAccount = state.selectedAccount {
+      let payments = state.payments[selectedAccount.id] ?? []
+      return .listView(
+        payments,
+        currency: selectedAccount.currency,
+        selectedAccountId: selectedAccount.id
+      )
     } else {
       return .onboarding
     }
