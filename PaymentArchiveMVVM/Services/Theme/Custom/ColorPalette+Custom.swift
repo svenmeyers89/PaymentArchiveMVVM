@@ -32,6 +32,9 @@ extension ColorPalette {
     ),
     activityIndicator: .init(
       tint: Color("ActivityIndicatorTint")
+    ),
+    toggle: .init(
+      tint: Color("ToggleTint")
     )
   )
 }
