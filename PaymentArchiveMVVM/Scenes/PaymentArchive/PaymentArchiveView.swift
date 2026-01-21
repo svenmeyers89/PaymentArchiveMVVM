@@ -23,6 +23,10 @@ struct PaymentArchiveView: View {
     case updateAccount(EditAccountUseCase)
     case updatePayment(EditPaymentUseCase)
     case changeTheme
+    case filterPaymentCategories(
+      [Payment.Category],
+      selectedPaymentCategories: Set<Payment.Category>
+    )
   }
 
   private var viewModel: PaymentArchiveViewModel
@@ -121,6 +125,20 @@ struct PaymentArchiveView: View {
             .buildEditPaymentScene(useCase: useCase)
         case .changeTheme:
           ChangeThemeView()
+        case .filterPaymentCategories(
+          let allCategories,
+          let selectedPaymentCategories
+        ):
+          NavigationStack {
+            CategoryListView(
+              allPaymentCategories: allCategories,
+              selectedPaymentCategories: selectedPaymentCategories,
+              colors: categoryListViewColors) { selectedPaymentCategories in
+                viewModel.didConfirmSelection(
+                  paymentCategories: selectedPaymentCategories
+                )
+              }
+          }
         default:
           EmptyView()
             .onAppear {
@@ -136,19 +154,34 @@ struct PaymentArchiveView: View {
             Image(systemName: "paintpalette")
           }
         }
+        
+        ToolbarItem(placement: .topBarLeading) {
+          Button {
+            presentedModal = .filterPaymentCategories(
+              viewModel.allPaymentCategories,
+              selectedPaymentCategories: viewModel.selectedPaymentCategories
+            )
+          } label: {
+            Image(systemName: "line.3.horizontal.decrease")
+          }
+        }
       }
     }
   }
 }
 
 extension PaymentArchiveView {
+  private var categoryIconColors: CategoryIcon.Colors {
+    .init(
+      iconBackground: theme.highlight.icon,
+      iconTint: theme.highlight.tint
+    )
+  }
+  
   var paymentViewColors: PaymentView.Colors {
     .init(
       background: theme.background.primary,
-      categoryIcon: .init(
-        iconBackground: theme.highlight.icon,
-        iconTint: theme.highlight.tint
-      ),
+      categoryIcon: categoryIconColors,
       paymentDateTime: theme.text.secondary,
       categoryName: theme.text.primary,
       paymentAmount: theme.text.primary
@@ -169,6 +202,18 @@ extension PaymentArchiveView {
     .init(
       background: theme.highlight.tint,
       icon: theme.highlight.icon
+    )
+  }
+  
+  var categoryListViewColors: CategoryListView.Colors {
+    .init(
+      categoryIcon: categoryIconColors,
+      categoryListItem: .init(
+        title: theme.text.primary,
+        background: theme.background.primary,
+        toggle: theme.toggle.tint
+      ),
+      background: theme.background.primary
     )
   }
 }

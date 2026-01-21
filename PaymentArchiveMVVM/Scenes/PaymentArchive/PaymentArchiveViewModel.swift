@@ -19,7 +19,7 @@ final class PaymentArchiveViewModel {
     if let selectedAccount = state.selectedAccount {
       let payments = state.payments[selectedAccount.id] ?? []
       return .listView(
-        payments,
+        payments.filter { selectedPaymentCategories.contains($0.category) },
         currency: selectedAccount.currency,
         selectedAccountId: selectedAccount.id
       )
@@ -28,8 +28,11 @@ final class PaymentArchiveViewModel {
     }
   }
 
+  let allPaymentCategories: [Payment.Category] = Payment.Category.allCases
+  private(set) var selectedPaymentCategories: Set<Payment.Category> = .init(Payment.Category.allCases)
+  
   private var errorMessage: String?
-
+  
   private let paymentArchive: PaymentArchive
 
   init(paymentArchive: PaymentArchive) {
@@ -43,5 +46,9 @@ final class PaymentArchiveViewModel {
     } catch {
       errorMessage = error.localizedDescription
     }
+  }
+  
+  func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
+    selectedPaymentCategories = paymentCategories
   }
 }
