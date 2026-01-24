@@ -16,6 +16,7 @@ struct CategoryListView: View {
   }
   
   @State private var selectedPaymentCategories: Set<Payment.Category>
+  @Environment(\.dismiss) var dismiss
   
   private let allPaymentCategories: [Payment.Category]
   private let colors: Colors
@@ -74,6 +75,14 @@ struct CategoryListView: View {
       ToolbarItem(placement: .confirmationAction) {
         Button("Save") {
           onSave(selectedPaymentCategories)
+          dismiss()
+        }
+        .disabled(selectedPaymentCategories.isEmpty)
+      }
+      
+      ToolbarItem(placement: .cancellationAction) {
+        Button("Cancel") {
+          dismiss()
         }
       }
     }

@@ -15,10 +15,14 @@ struct CategoryListItemView: View {
       categoryIconColors: CategoryIcon.Colors
     )
     
-    fileprivate var title: String {
+    fileprivate func title(isSelected: Bool) -> String {
       switch self {
       case .allCategories:
-        "All Categories"
+        if isSelected {
+          "Unselect All Categories"
+        } else {
+          "Select All Categories"
+        }
       case .paymentCategory(let category, _):
         "\(category.rawValue)"
       }
@@ -51,7 +55,7 @@ struct CategoryListItemView: View {
     HStack(spacing: 12) {
       categoryIcon
       
-      Text(itemType.title)
+      Text(itemType.title(isSelected: isSelected))
         .font(.headline)
         .foregroundStyle(colors.title)
       

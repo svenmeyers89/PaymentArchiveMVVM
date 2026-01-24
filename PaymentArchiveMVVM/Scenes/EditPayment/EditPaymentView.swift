@@ -65,7 +65,7 @@ struct EditPaymentView: View {
           .disabled(isActionInProgress)
           
           Button("Cancel") {
-            print("Canceled!")
+            dismiss()
           }
           
           Spacer()
