@@ -32,6 +32,9 @@ extension ColorPalette {
     ),
     activityIndicator: .init(
       tint: .gray
+    ),
+    toggle: .init(
+      tint: .blue
     )
   )
 }
