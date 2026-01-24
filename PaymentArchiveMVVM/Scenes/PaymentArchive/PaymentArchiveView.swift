@@ -23,10 +23,7 @@ struct PaymentArchiveView: View {
     case updateAccount(EditAccountUseCase)
     case updatePayment(EditPaymentUseCase)
     case changeTheme
-    case filterPaymentCategories(
-      [Payment.Category],
-      selectedPaymentCategories: Set<Payment.Category>
-    )
+    case filterPaymentCategories
   }
 
   private var viewModel: PaymentArchiveViewModel
@@ -125,14 +122,11 @@ struct PaymentArchiveView: View {
             .buildEditPaymentScene(useCase: useCase)
         case .changeTheme:
           ChangeThemeView()
-        case .filterPaymentCategories(
-          let allCategories,
-          let selectedPaymentCategories
-        ):
+        case .filterPaymentCategories:
           NavigationStack {
             CategoryListView(
-              allPaymentCategories: allCategories,
-              selectedPaymentCategories: selectedPaymentCategories,
+              allPaymentCategories: viewModel.allPaymentCategories,
+              selectedPaymentCategories: viewModel.selectedPaymentCategories,
               colors: categoryListViewColors) { selectedPaymentCategories in
                 viewModel.didConfirmSelection(
                   paymentCategories: selectedPaymentCategories
@@ -157,10 +151,7 @@ struct PaymentArchiveView: View {
         
         ToolbarItem(placement: .topBarLeading) {
           Button {
-            presentedModal = .filterPaymentCategories(
-              viewModel.allPaymentCategories,
-              selectedPaymentCategories: viewModel.selectedPaymentCategories
-            )
+            presentedModal = .filterPaymentCategories
           } label: {
             Image(systemName: "line.3.horizontal.decrease")
           }
