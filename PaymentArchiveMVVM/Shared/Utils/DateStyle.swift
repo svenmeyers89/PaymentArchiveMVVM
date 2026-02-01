@@ -14,5 +14,23 @@ enum DateStyle {
     .day()
     .hour()
     .minute()
-    .locale(Locale.appLocale)
+  
+  static let timeOnly: DateFormatter = {
+    let f = DateFormatter()
+    f.timeStyle = .short
+    f.dateStyle = .none
+    return f
+  }()
+
+  static let weekdayDayMonth: DateFormatter = {
+    let f = DateFormatter()
+    f.setLocalizedDateFormatFromTemplate("EEEE d MMM")
+    return f
+  }()
+
+  static let monthYear: DateFormatter = {
+    let f = DateFormatter()
+    f.setLocalizedDateFormatFromTemplate("LLLL yyyy")
+    return f
+  }()
 }

@@ -32,7 +32,7 @@ struct PaymentView: View {
         .foregroundStyle(colors.paymentAmount)
       } label: {
         VStack(alignment: .leading) {
-          Text("\(payment.createdAt.formatted(DateStyle.dateTime))")
+          Text(DateStyle.timeOnly.string(from: payment.createdAt))
             .font(.headline)
             .foregroundStyle(colors.paymentDateTime)
           Text("\(payment.category.rawValue)")
