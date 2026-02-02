@@ -8,18 +8,33 @@
 // temp
 import Foundation
 
-import Combine
 import Observation
 
 @MainActor @Observable
 final class PaymentArchiveViewModel {
-  private(set) var contentType: PaymentArchiveView.ContentType = .loading
+  var contentType: PaymentArchiveView.ContentType {
+    if let errorMessage {
+      return .error(errorMessage)
+    }
+    
+    guard let state = paymentArchive.state else {
+      return .loading
+    }
+    
+    guard let selectedAccount = state.selectedAccount else {
+      return .onboarding
+    }
+    
+    let paymentGroups = self.recomuputePaymentGroups()
+    
+    return .listView(sections: paymentGroups, currency: selectedAccount.currency, selectedAccountId: selectedAccount.id)
+  }
 
   let allPaymentCategories: [Payment.Category] = Payment.Category.allCases
   private(set) var selectedPaymentCategories: Set<Payment.Category> = .init(Payment.Category.allCases)
 
   private let dataSource: PaymentArchiveDataSource = .init()
-  private var cancellables: Set<AnyCancellable> = []
+  // private var paymentGroups: [PaymentGroup] = []
   
   private var errorMessage: String?
   
@@ -27,26 +42,6 @@ final class PaymentArchiveViewModel {
 
   init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
-    
-    observeArchive()
-  }
-  
-  private func observeArchive() {
-    withObservationTracking {
-      let initState = paymentArchive.state
-      Task { [weak self] in
-        await self?.determineContent(from: initState)
-      }
-    } onChange: {
-      print("### on change")
-      Task { [weak self] in
-        guard let self else {
-          return
-        }
-        await determineContent(from: paymentArchive.state)
-        //self?.observeArchive()
-      }
-    }
   }
 
   func loadContent() async {
@@ -60,33 +55,12 @@ final class PaymentArchiveViewModel {
   
   func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
     selectedPaymentCategories = paymentCategories
+//    Task {
+//      self.paymentGroups = await recomuputePaymentGroups()
+//    }
   }
   
-  private func determineContent(from state: PaymentArchive.State?) async {
-    if let errorMessage {
-      contentType = .error(errorMessage)
-      return
-    }
-
-    guard let state else {
-      contentType = .loading
-      return
-    }
-
-    guard let selectedAccount = state.selectedAccount else {
-      contentType = .onboarding
-      return
-    }
-    
-    let paymentGroups = await recomuputePaymentGroups()
-    contentType = .listView(
-      sections: paymentGroups,
-      currency: selectedAccount.currency,
-      selectedAccountId: selectedAccount.id
-    )
-  }
-  
-  private func recomuputePaymentGroups() async -> [PaymentGroup] {
+  func recomuputePaymentGroups() -> [PaymentGroup] {
     guard let state = paymentArchive.state,
           let account = state.selectedAccount else {
       return []
@@ -98,7 +72,7 @@ final class PaymentArchiveViewModel {
       selectedPaymentCategories.contains($0.category)
     }
 
-    let paymentGroups = await dataSource.groupPayments(using: filtered, currency: account.currency)
+    let paymentGroups = dataSource.groupPayments(using: filtered, currency: account.currency)
     return paymentGroups
   }
 }
@@ -183,7 +157,7 @@ struct PaymentGroup {
   }
 }
 
-actor PaymentArchiveDataSource {
+struct PaymentArchiveDataSource {
   private func getKey(for date: Date, calendar: Calendar, groupKind: PaymentGroup.Kind) -> String {
     let components = calendar.dateComponents([.year, .month, .day], from: date)
     guard let year = components.year,
