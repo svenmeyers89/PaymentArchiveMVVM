@@ -87,11 +87,6 @@ struct PaymentGroup {
     case dailyPayments
   }
   
-  enum UpdateType {
-    case append
-    case reset
-  }
-  
   let payments: [Payment]
   let currency: Currency
   let kind: Kind
@@ -116,44 +111,6 @@ struct PaymentGroup {
   
   var dateRepresentative: Date? {
     payments.first?.createdAt
-  }
-  
-  func doesDateBelongToGroup(_ date: Date, calendar: Calendar) -> Bool {
-    guard let dateRepresentative = dateRepresentative else {
-      return false
-    }
-
-    switch kind {
-    case .monthlyStats:
-      return calendar.isDate(date, inMonthOf: dateRepresentative)
-    case .dailyPayments:
-      return calendar.isDate(date, inDayOf: dateRepresentative)
-    }
-  }
-  
-  func updated(with payment: Payment, updateType: UpdateType, calendar: Calendar) -> PaymentGroup {
-    switch updateType {
-    case .append:
-      guard payments.isEmpty || doesDateBelongToGroup(payment.createdAt, calendar: calendar) else {
-        return self
-      }
-      var updatedPayments = payments
-      updatedPayments.append(payment)
-      let updatedTotalAmountMinorUnits = totalAmountMinorUnits + payment.amountMinorUnits
-      return PaymentGroup(
-        payments: updatedPayments,
-        currency: currency,
-        kind: kind,
-        totalAmountMinorUnits: updatedTotalAmountMinorUnits
-      )
-    case .reset:
-      return PaymentGroup(
-        payments: [payment],
-        currency: currency,
-        kind: kind,
-        totalAmountMinorUnits: payment.amountMinorUnits
-      )
-    }
   }
 }
 
