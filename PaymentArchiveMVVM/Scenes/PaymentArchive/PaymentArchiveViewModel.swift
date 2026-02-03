@@ -17,31 +17,44 @@ final class PaymentArchiveViewModel {
       return .error(errorMessage)
     }
     
-    guard let state = paymentArchive.state else {
+    let state = stateWrapper.state
+    
+    switch state {
+    case .loadingInitialState:
       return .loading
-    }
-    
-    guard let selectedAccount = state.selectedAccount else {
+    case .shouldOnboard:
       return .onboarding
+    case let .didLoad(paymentGroups, currency, selectedAccountId):
+      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId)
     }
-    
-    let paymentGroups = self.recomuputePaymentGroups()
-    
-    return .listView(sections: paymentGroups, currency: selectedAccount.currency, selectedAccountId: selectedAccount.id)
   }
 
-  let allPaymentCategories: [Payment.Category] = Payment.Category.allCases
-  private(set) var selectedPaymentCategories: Set<Payment.Category> = .init(Payment.Category.allCases)
+  
+  var allPaymentCategories: [Payment.Category] {
+    paymentArchiveCategorySelector.allPaymentCategories
+  }
+  
+  var selectedPaymentCategories: Set<Payment.Category> {
+    paymentArchiveCategorySelector.selectedPaymentCategories
+  }
 
-  private let dataSource: PaymentArchiveDataSource = .init()
-  // private var paymentGroups: [PaymentGroup] = []
+  private let stateWrapper: PaymentArchiveStateWrapper
+  private let paymentArchive: PaymentArchive
+  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
   
   private var errorMessage: String?
-  
-  private let paymentArchive: PaymentArchive
 
   init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
+    self.paymentArchiveCategorySelector = .init(
+      allPaymentCategories: Payment.Category.allCases,
+      selectedPaymentCategories: Set<Payment.Category>(Payment.Category.allCases)
+    )
+    self.stateWrapper = .init(
+      paymentArchive: paymentArchive,
+      paymentGroupBuilder: PaymentArchiveGroupBuilder(),
+      paymentArchiveCategorySelector: paymentArchiveCategorySelector
+    )
   }
 
   func loadContent() async {
@@ -54,26 +67,7 @@ final class PaymentArchiveViewModel {
   }
   
   func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
-    selectedPaymentCategories = paymentCategories
-//    Task {
-//      self.paymentGroups = await recomuputePaymentGroups()
-//    }
-  }
-  
-  func recomuputePaymentGroups() -> [PaymentGroup] {
-    guard let state = paymentArchive.state,
-          let account = state.selectedAccount else {
-      return []
-    }
-
-    let allPayments = state.payments[account.id] ?? []
-
-    let filtered = allPayments.filter {
-      selectedPaymentCategories.contains($0.category)
-    }
-
-    let paymentGroups = dataSource.groupPayments(using: filtered, currency: account.currency)
-    return paymentGroups
+    paymentArchiveCategorySelector.didConfirmSelection(paymentCategories: paymentCategories)
   }
 }
 
@@ -114,7 +108,83 @@ struct PaymentGroup {
   }
 }
 
-struct PaymentArchiveDataSource {
+@MainActor @Observable
+final class PaymentArchiveCategorySelector {
+  let allPaymentCategories: [Payment.Category]
+  private(set) var selectedPaymentCategories: Set<Payment.Category>
+  
+  init(
+    allPaymentCategories: [Payment.Category],
+    selectedPaymentCategories: Set<Payment.Category>
+  ) {
+    self.allPaymentCategories = allPaymentCategories
+    self.selectedPaymentCategories = selectedPaymentCategories
+  }
+  
+  func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
+    selectedPaymentCategories = paymentCategories
+  }
+}
+
+@MainActor @Observable
+final class PaymentArchiveStateWrapper {
+  enum WrappedState {
+    case loadingInitialState
+    case shouldOnboard
+    case didLoad(paymentGroups: [PaymentGroup], currency: Currency, selectedAccountId: String)
+  }
+
+  private(set) var state: WrappedState = .loadingInitialState
+  
+  private let paymentArchive: PaymentArchive
+  private let paymentGroupBuilder: PaymentArchiveGroupBuilder
+  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
+  
+  init(
+    paymentArchive: PaymentArchive,
+    paymentGroupBuilder: PaymentArchiveGroupBuilder,
+    paymentArchiveCategorySelector: PaymentArchiveCategorySelector
+  ) {
+    self.paymentArchive = paymentArchive
+    self.paymentGroupBuilder = paymentGroupBuilder
+    self.paymentArchiveCategorySelector = paymentArchiveCategorySelector
+    
+    observeState()
+  }
+
+  private func observeState() {
+    withObservationTracking {
+      _ = paymentArchive.state
+      _ = paymentArchiveCategorySelector.selectedPaymentCategories
+    } onChange: { [weak self] in
+      Task {
+        await self?.regenerateState()
+        await self?.observeState()
+      }
+    }
+  }
+
+  private func regenerateState() async {
+    guard let state = paymentArchive.state else {
+      self.state = .loadingInitialState
+      return
+    }
+    
+    guard let selectedAccount = state.selectedAccount else {
+      self.state = .shouldOnboard
+      return
+    }
+    
+    let allPayments: [Payment] = state.payments[selectedAccount.id] ?? []
+    let selectedPaymentCategories = paymentArchiveCategorySelector.selectedPaymentCategories
+    let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
+    let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
+    
+    self.state = .didLoad(paymentGroups: paymentGroups, currency: selectedAccount.currency, selectedAccountId: selectedAccount.id)
+  }
+}
+
+actor PaymentArchiveGroupBuilder {
   private func getKey(for date: Date, calendar: Calendar, groupKind: PaymentGroup.Kind) -> String {
     let components = calendar.dateComponents([.year, .month, .day], from: date)
     guard let year = components.year,

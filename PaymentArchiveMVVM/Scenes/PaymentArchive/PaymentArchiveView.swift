@@ -26,6 +26,7 @@ struct PaymentArchiveView: View {
     case filterPaymentCategories
   }
 
+  @State
   private var viewModel: PaymentArchiveViewModel
   
   @Environment(\.sceneFactory) private var sceneFactory
