@@ -80,6 +80,7 @@ struct PaymentArchiveView: View {
               Section {
                 PeriodicalExpenseView(paymentGroup: paymentGroup)
               }
+              
             case .dailyPayments:
               Section {
                 PeriodicalExpenseView(paymentGroup: paymentGroup)
