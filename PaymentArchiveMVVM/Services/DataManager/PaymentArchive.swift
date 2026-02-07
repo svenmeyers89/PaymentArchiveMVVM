@@ -5,6 +5,7 @@
 //  Created by Sven Majeric on 21.08.2025..
 //
 
+import Foundation
 import Observation
 
 @MainActor
@@ -17,18 +18,26 @@ final class PaymentArchive: Sendable {
 
   private(set) var state: State? {
     didSet {
-      continuation?.yield(state)
+      for continuation in continuations.values {
+        continuation.yield(state)
+      }
     }
   }
   
   lazy var stateStream: AsyncStream<State?> = {
     AsyncStream { continuation in
-      self.continuation = continuation
+      let id = UUID()
+      continuations[id] = continuation
       continuation.yield(self.state)
+      continuation.onTermination = { [weak self] _ in
+        Task { @MainActor in
+          self?.continuations.removeValue(forKey: id)
+        }
+      }
     }
   }()
   
-  private var continuation: AsyncStream<State?>.Continuation?
+  private var continuations: [UUID: AsyncStream<State?>.Continuation] = [:]
 
   private let persistanceStore: PersistenceStore
   

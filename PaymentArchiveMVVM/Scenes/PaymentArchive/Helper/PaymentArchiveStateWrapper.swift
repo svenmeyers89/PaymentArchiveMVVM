@@ -73,7 +73,7 @@ final class PaymentArchiveStateWrapper {
     }
     
     let allPayments: [Payment] = state.payments[selectedAccount.id] ?? []
-    let selectedPaymentCategories = paymentArchiveCategorySelector.selectedPaymentCategories
+    let selectedPaymentCategories = selectedPaymentCategories
     let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
     let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
     
@@ -102,6 +102,21 @@ actor AsyncSequenceCombineLatestState<Element1, Element2> {
   }
 }
 
+actor AsyncSequenceFinishOnce {
+  private var finished: Bool = false
+  private let finish: (Error?) -> Void
+
+  init(finish: @escaping (Error?) -> Void) {
+    self.finish = finish
+  }
+
+  func call(_ error: Error? = nil) {
+    guard !finished else { return }
+    finished = true
+    finish(error)
+  }
+}
+
 func combineLatest<A: AsyncSequence, B: AsyncSequence>(
   _ a: A,
   _ b: B
@@ -115,6 +130,13 @@ where
 {
   AsyncThrowingStream { continuation in
     let state = AsyncSequenceCombineLatestState<A.Element, B.Element>()
+    let finishOnce = AsyncSequenceFinishOnce { error in
+      if let error {
+        continuation.finish(throwing: error)
+      } else {
+        continuation.finish()
+      }
+    }
 
     let t1 = Task {
       do {
@@ -123,8 +145,9 @@ where
             continuation.yield(pair)
           }
         }
+        await finishOnce.call()
       } catch {
-        continuation.finish(throwing: error)
+        await finishOnce.call(error)
       }
     }
 
@@ -135,8 +158,9 @@ where
             continuation.yield(pair)
           }
         }
+        await finishOnce.call()
       } catch {
-        continuation.finish(throwing: error)
+        await finishOnce.call(error)
       }
     }
 

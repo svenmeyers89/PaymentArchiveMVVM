@@ -23,6 +23,11 @@ final class PaymentArchiveCategorySelector {
     AsyncStream { continuation in
       self.continuation = continuation
       continuation.yield(selectedPaymentCategories)
+      continuation.onTermination = { [weak self] _ in
+        Task { @MainActor in
+          self?.continuation = nil
+        }
+      }
     }
   }()
   
