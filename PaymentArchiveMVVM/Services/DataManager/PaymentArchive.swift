@@ -7,7 +7,7 @@
 
 import Observation
 
-@MainActor @Observable
+@MainActor
 final class PaymentArchive: Sendable {
   struct State {
     fileprivate(set) var selectedAccountId: String?
@@ -15,7 +15,20 @@ final class PaymentArchive: Sendable {
     fileprivate(set) var payments: [String: [Payment]]
   }
 
-  private(set) var state: State?
+  private(set) var state: State? {
+    didSet {
+      continuation?.yield(state)
+    }
+  }
+  
+  lazy var stateStream: AsyncStream<State?> = {
+    AsyncStream { continuation in
+      self.continuation = continuation
+      continuation.yield(self.state)
+    }
+  }()
+  
+  private var continuation: AsyncStream<State?>.Continuation?
 
   private let persistanceStore: PersistenceStore
   

@@ -7,10 +7,24 @@
 
 import Observation
 
-@MainActor @Observable
+@MainActor
 final class PaymentArchiveCategorySelector {
   let allPaymentCategories: [Payment.Category]
-  private(set) var selectedPaymentCategories: Set<Payment.Category>
+  
+  private(set) var selectedPaymentCategories: Set<Payment.Category> {
+    didSet {
+      continuation?.yield(selectedPaymentCategories)
+    }
+  }
+  
+  private var continuation: AsyncStream<Set<Payment.Category>>.Continuation?
+  
+  lazy var selectionStream: AsyncStream<Set<Payment.Category>> = {
+    AsyncStream { continuation in
+      self.continuation = continuation
+      continuation.yield(selectedPaymentCategories)
+    }
+  }()
   
   init(
     allPaymentCategories: [Payment.Category],
