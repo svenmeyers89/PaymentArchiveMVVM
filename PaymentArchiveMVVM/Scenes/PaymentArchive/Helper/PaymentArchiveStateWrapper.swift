@@ -21,7 +21,10 @@ final class PaymentArchiveStateWrapper {
   private let paymentGroupBuilder: PaymentArchiveGroupBuilder
   private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
   
-  // non-isolation required for cancelation in deinit
+  /// deinit doesn't necessarily happen on Main thread...
+  ///
+  /// So either @ObservationIgnored or non-isolation attribute (for general use case) is required
+  /// when cancelling in deinit
   @ObservationIgnored
   private var task: Task<Void, Never>?
   
@@ -117,6 +120,11 @@ actor AsyncSequenceFinishOnce {
   }
 }
 
+/// Note combineLatest doesn't return a shared/broadcast stream
+/// For general use, call it separately for each subscriber
+///
+/// Starting with iOS 18, there's AsyncStream.Failure generic which can be set to be Never
+/// That setup would enable AsyncSequence as returned type
 func combineLatest<A: AsyncSequence, B: AsyncSequence>(
   _ a: A,
   _ b: B
@@ -126,7 +134,6 @@ where
   B: Sendable,
   A.Element: Sendable,
   B.Element: Sendable
-// Starting with iOS 18, there's A.Failure which can be required to be Never
 {
   AsyncThrowingStream { continuation in
     let state = AsyncSequenceCombineLatestState<A.Element, B.Element>()
