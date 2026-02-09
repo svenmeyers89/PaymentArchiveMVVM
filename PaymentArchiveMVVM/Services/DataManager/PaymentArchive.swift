@@ -18,13 +18,15 @@ final class PaymentArchive: Sendable {
 
   private(set) var state: State? {
     didSet {
+      // Emit to all active continuations to achieve broadcasting
       for continuation in continuations.values {
         continuation.yield(state)
       }
     }
   }
   
-  lazy var stateStream: AsyncStream<State?> = {
+  // Generate a stream for each new consumer
+  func makeStateStream() -> AsyncStream<State?> {
     AsyncStream { continuation in
       let id = UUID()
       continuations[id] = continuation
@@ -35,8 +37,8 @@ final class PaymentArchive: Sendable {
         }
       }
     }
-  }()
-  
+  }
+
   private var continuations: [UUID: AsyncStream<State?>.Continuation] = [:]
 
   private let persistanceStore: PersistenceStore
