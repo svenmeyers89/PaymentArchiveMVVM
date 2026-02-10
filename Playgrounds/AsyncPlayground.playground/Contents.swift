@@ -37,34 +37,7 @@ func runCombineLatestTest() {
   }
 }
 
-// MARK: - Broadcaster
-
-@MainActor
-final class BroadcastIntStream {
-  private var continuations: [UUID: AsyncStream<Int>.Continuation] = [:]
-  private var counter: Int = 0
-
-  func makeStream() -> AsyncStream<Int> {
-    AsyncStream { continuation in
-      let id = UUID()
-      continuations[id] = continuation
-      print("## Added a new continuation with id: \(id)")
-      continuation.yield(counter)
-      continuation.onTermination = { [weak self] _ in
-        Task { @MainActor in
-          self?.continuations.removeValue(forKey: id)
-        }
-      }
-    }
-  }
-
-  func set(_ value: Int) {
-    counter = value
-    for continuation in continuations.values {
-      continuation.yield(value)
-    }
-  }
-}
+// MARK: - MainAsyncStream
 
 actor CounterTracker {
   private let id: Int
@@ -82,13 +55,46 @@ actor CounterTracker {
   }
 }
 
-func runBroadcasterTest() {
-  Task {
-    let broadcaster = await BroadcastIntStream()
+func runMainSingleStreamTest() {
+  Task { @MainActor in
+    let stream = MainSingleAsyncStream<Int>(value: 0)
+    
+    let counter1 = CounterTracker(id: 1, stream: stream.stream)
 
-    let counter1 = CounterTracker(id: 1, stream: await broadcaster.makeStream())
-    let counter2 = CounterTracker(id: 2, stream: await broadcaster.makeStream())
-    let counter3 = CounterTracker(id: 3, stream: await broadcaster.makeStream())
+    let t1 = Task {
+      await counter1.track()
+    }
+    
+    var t2: Task<Void, Never>? = nil
+    
+    for value in 1...6 {
+      try? await Task.sleep(nanoseconds: 250_000_000)
+      stream.value = value
+      
+      // Uncommenting the following code breaks the stream
+//      if value == 3 {
+//        t2 = Task {
+//          let counter2 = CounterTracker(id: 2, stream: stream.stream)
+//          await counter2.track()
+//        }
+//      }
+    }
+    
+    t1.cancel()
+    t2?.cancel()
+    PlaygroundPage.current.finishExecution()
+  }
+}
+
+// MARK: - Broadcaster
+
+func runBroadcasterTest() {
+  Task { @MainActor in
+    let broadcaster = MainBroadcaster<Int>(value: 0)
+
+    let counter1 = CounterTracker(id: 1, stream: broadcaster.makeStream())
+    let counter2 = CounterTracker(id: 2, stream: broadcaster.makeStream())
+    let counter3 = CounterTracker(id: 3, stream: broadcaster.makeStream())
 
     let t1 = Task {
       await counter1.track()
@@ -103,14 +109,14 @@ func runBroadcasterTest() {
     
     for value in 1...5 {
       try? await Task.sleep(nanoseconds: 250_000_000)
-      await broadcaster.set(value)
+      broadcaster.value = value
       
       if value == 3 {
         t3 = Task {
           await counter3.track()
         }
         
-        let counter4 = CounterTracker(id: 4, stream: await broadcaster.makeStream())
+        let counter4 = CounterTracker(id: 4, stream: broadcaster.makeStream())
         t4 = Task {
           await counter4.track()
         }
@@ -130,13 +136,16 @@ func runBroadcasterTest() {
 enum PlaygroundTest {
   case combineLatest
   case broadcaster
+  case singleStream
 }
 
-let activeTest: PlaygroundTest = .combineLatest
+let activeTest: PlaygroundTest = .singleStream
 
 switch activeTest {
 case .combineLatest:
   runCombineLatestTest()
 case .broadcaster:
   runBroadcasterTest()
+case .singleStream:
+  runMainSingleStreamTest()
 }

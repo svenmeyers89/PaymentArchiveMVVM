@@ -5,6 +5,7 @@
 //  Created by Sven Majeric on 21.08.2025..
 //
 
+import AsyncOperators
 import Foundation
 import Observation
 
@@ -16,30 +17,16 @@ final class PaymentArchive: Sendable {
     fileprivate(set) var payments: [String: [Payment]]
   }
 
-  private(set) var state: State? {
-    didSet {
-      // Emit to all active continuations to achieve broadcasting
-      for continuation in continuations.values {
-        continuation.yield(state)
-      }
-    }
+  private let broadcaster: MainBroadcaster<State?> = .init(value: nil)
+  
+  var currentState: State? {
+    broadcaster.value
   }
   
   // Generate a stream for each new consumer
   func makeStateStream() -> AsyncStream<State?> {
-    AsyncStream { continuation in
-      let id = UUID()
-      continuations[id] = continuation
-      continuation.yield(self.state)
-      continuation.onTermination = { [weak self] _ in
-        Task { @MainActor in
-          self?.continuations.removeValue(forKey: id)
-        }
-      }
-    }
+    broadcaster.makeStream()
   }
-
-  private var continuations: [UUID: AsyncStream<State?>.Continuation] = [:]
 
   private let persistanceStore: PersistenceStore
   
@@ -71,7 +58,7 @@ final class PaymentArchive: Sendable {
       accounts: Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0) }),
       payments: payments
     )
-    self.state = state
+    broadcaster.value = state
   }
 }
 
@@ -81,9 +68,9 @@ extension PaymentArchive: EditPaymentDataManager {
 
     let payments = try await persistanceStore.loadPayments(accountId: payment.accountId)
 
-    var updatedState: State? = self.state
+    var updatedState: State? = currentState
     updatedState?.payments[payment.accountId] = payments
-    self.state = updatedState
+    broadcaster.value = updatedState
   }
 }
 
@@ -91,11 +78,11 @@ extension PaymentArchive: EditAccountDataManager {
   func save(account: Account) async throws {
     try await persistanceStore.saveAccount(account)
 
-    var updatedState = self.state
+    var updatedState = currentState
     updatedState?.accounts[account.id] = account
     if updatedState?.accounts.count == 1 {
       updatedState?.selectedAccountId = account.id
     }
-    self.state = updatedState
+    broadcaster.value = updatedState
   }
 }

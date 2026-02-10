@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditAccountView: View {
-  @Bindable private var viewModel: EditAccountViewModel
+  @State private var viewModel: EditAccountViewModel
 
   @State private var isActionInProgress: Bool = false
   @State private var toastMessage: ToastBar.Message? = nil
