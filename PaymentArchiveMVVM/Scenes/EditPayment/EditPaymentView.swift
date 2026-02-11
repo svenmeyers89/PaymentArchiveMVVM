@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditPaymentView: View {
-  @Bindable private var viewModel: EditPaymentViewModel
+  @State private var viewModel: EditPaymentViewModel
   
   @State private var isActionInProgress: Bool = false
   @State private var toastMessage: ToastBar.Message? = nil
@@ -17,7 +17,7 @@ struct EditPaymentView: View {
   @Environment(\.dismiss) private var dismiss
 
   init(viewModel: EditPaymentViewModel) {
-    self.viewModel = viewModel
+    _viewModel = .init(initialValue: viewModel)
   }
 
   var body: some View {

@@ -5,22 +5,32 @@
 //  Created by Sven Majeric on 03.02.2026..
 //
 
+import AsyncOperators
 import Observation
 
-@MainActor @Observable
+@MainActor
 final class PaymentArchiveCategorySelector {
   let allPaymentCategories: [Payment.Category]
-  private(set) var selectedPaymentCategories: Set<Payment.Category>
+  
+  private let stream: MainSingleAsyncStream<Set<Payment.Category>>
+  
+  var selectedPaymentCategories: Set<Payment.Category> {
+    stream.value
+  }
+
+  var selectionStream: AsyncStream<Set<Payment.Category>> {
+    stream.stream
+  }
   
   init(
     allPaymentCategories: [Payment.Category],
     selectedPaymentCategories: Set<Payment.Category>
   ) {
     self.allPaymentCategories = allPaymentCategories
-    self.selectedPaymentCategories = selectedPaymentCategories
+    self.stream = .init(value: selectedPaymentCategories)
   }
   
   func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
-    selectedPaymentCategories = paymentCategories
+    stream.value = paymentCategories
   }
 }

@@ -5,6 +5,7 @@
 //  Created by Sven Majeric on 03.02.2026..
 //
 
+import AsyncOperators
 import Observation
 
 @MainActor @Observable
@@ -21,6 +22,13 @@ final class PaymentArchiveStateWrapper {
   private let paymentGroupBuilder: PaymentArchiveGroupBuilder
   private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
   
+  /// deinit doesn't necessarily happen on Main thread...
+  ///
+  /// So either @ObservationIgnored or non-isolation attribute (for general use case) is required
+  /// when cancelling in deinit
+  @ObservationIgnored
+  private var task: Task<Void, Never>?
+  
   init(
     paymentArchive: PaymentArchive,
     paymentGroupBuilder: PaymentArchiveGroupBuilder,
@@ -30,23 +38,35 @@ final class PaymentArchiveStateWrapper {
     self.paymentGroupBuilder = paymentGroupBuilder
     self.paymentArchiveCategorySelector = paymentArchiveCategorySelector
     
-    observeState()
+    task = Task { [weak self] in
+      await self?.observe()
+    }
+  }
+  
+  deinit {
+    task?.cancel()
   }
 
-  private func observeState() {
-    withObservationTracking {
-      _ = paymentArchive.state
-      _ = paymentArchiveCategorySelector.selectedPaymentCategories
-    } onChange: { [weak self] in
-      Task {
-        await self?.regenerateState()
-        await self?.observeState()
+  private func observe() async {
+    let combinedStream = combineLatest(
+      paymentArchive.makeStateStream(),
+      paymentArchiveCategorySelector.selectionStream
+    )
+    
+    do {
+      for try await (state, selectedPaymentCategories) in combinedStream {
+        await regenerateWrappedState(state, selectedPaymentCategories: selectedPaymentCategories)
       }
+    } catch {
+      fatalError("Combined stream should never fail!")
     }
   }
 
-  private func regenerateState() async {
-    guard let state = paymentArchive.state else {
+  private func regenerateWrappedState(
+    _ state: PaymentArchive.State?,
+    selectedPaymentCategories: Set<Payment.Category>
+  ) async {
+    guard let state else {
       self.state = .missingInitialState
       return
     }
@@ -57,7 +77,7 @@ final class PaymentArchiveStateWrapper {
     }
     
     let allPayments: [Payment] = state.payments[selectedAccount.id] ?? []
-    let selectedPaymentCategories = paymentArchiveCategorySelector.selectedPaymentCategories
+    let selectedPaymentCategories = selectedPaymentCategories
     let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
     let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
     
