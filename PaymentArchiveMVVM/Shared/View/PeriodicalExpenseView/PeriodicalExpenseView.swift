@@ -7,6 +7,26 @@
 
 import SwiftUI
 
+struct PeriodicalExpenseView: View {
+  let paymentGroup: PaymentGroup
+  
+  var body: some View {
+    HStack {
+      Text(paymentGroup.expenseDescription())
+        .font(.title2)
+      Spacer()
+      Text(
+        paymentGroup.currency
+          .string(
+            from: paymentGroup.totalAmountMinorUnits,
+            appendCurrencyCode: true
+          )
+      )
+      .font(.headline)
+    }
+  }
+}
+
 extension PaymentGroup {
   fileprivate func expenseDescription(
     now: Date = .init(),
@@ -15,6 +35,7 @@ extension PaymentGroup {
     guard let dateRepresentative else {
       fatalError("Invalid payment group!")
     }
+
     switch kind {
     case .dailyPayments:
       if calendar.isDateInToday(dateRepresentative) {
@@ -40,26 +61,6 @@ extension PaymentGroup {
         f.locale = Locale.appLocale
         return f.string(from: dateRepresentative)
       }
-    }
-  }
-}
-
-struct PeriodicalExpenseView: View {
-  let paymentGroup: PaymentGroup
-  
-  var body: some View {
-    HStack {
-      Text(paymentGroup.expenseDescription())
-        .font(.title2)
-      Spacer()
-      Text(
-        paymentGroup.currency
-          .string(
-            from: paymentGroup.totalAmountMinorUnits,
-            appendCurrencyCode: true
-          )
-      )
-      .font(.headline)
     }
   }
 }
