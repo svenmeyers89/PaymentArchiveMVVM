@@ -13,30 +13,44 @@ final class PaymentArchiveViewModel {
     if let errorMessage {
       return .error(errorMessage)
     }
-    guard let state = paymentArchive.state else {
+    
+    let state = stateWrapper.wrappedState
+    
+    switch state {
+    case .missingInitialState:
       return .loading
-    }
-    if let selectedAccount = state.selectedAccount {
-      let payments = state.payments[selectedAccount.id] ?? []
-      return .listView(
-        payments.filter { selectedPaymentCategories.contains($0.category) },
-        currency: selectedAccount.currency,
-        selectedAccountId: selectedAccount.id
-      )
-    } else {
+    case .shouldOnboard:
       return .onboarding
+    case let .shouldLoadList(paymentGroups, currency, selectedAccountId):
+      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId)
     }
   }
-
-  let allPaymentCategories: [Payment.Category] = Payment.Category.allCases
-  private(set) var selectedPaymentCategories: Set<Payment.Category> = .init(Payment.Category.allCases)
+  
+  var allPaymentCategories: [Payment.Category] {
+    paymentArchiveCategorySelector.allPaymentCategories
+  }
+  
+  var selectedPaymentCategories: Set<Payment.Category> {
+    paymentArchiveCategorySelector.currentlySelectedPaymentCategories
+  }
   
   private var errorMessage: String?
-  
+
+  private let stateWrapper: PaymentArchiveStateWrapper
   private let paymentArchive: PaymentArchive
+  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
 
   init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
+    self.paymentArchiveCategorySelector = .init(
+      allPaymentCategories: Payment.Category.allCases,
+      selectedPaymentCategories: Set<Payment.Category>(Payment.Category.allCases)
+    )
+    self.stateWrapper = .init(
+      paymentArchive: paymentArchive,
+      paymentGroupBuilder: PaymentArchiveGroupBuilder(),
+      paymentArchiveCategorySelector: paymentArchiveCategorySelector
+    )
   }
 
   func loadContent() async {
@@ -49,6 +63,6 @@ final class PaymentArchiveViewModel {
   }
   
   func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
-    selectedPaymentCategories = paymentCategories
+    paymentArchiveCategorySelector.didConfirmSelection(paymentCategories: paymentCategories)
   }
 }

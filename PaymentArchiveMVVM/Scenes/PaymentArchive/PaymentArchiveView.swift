@@ -12,7 +12,7 @@ struct PaymentArchiveView: View {
     case loading
     case onboarding
     case listView(
-      [Payment],
+      sections: [PaymentGroup],
       currency: Currency,
       selectedAccountId: String
     )
@@ -26,6 +26,7 @@ struct PaymentArchiveView: View {
     case filterPaymentCategories
   }
 
+  @State
   private var viewModel: PaymentArchiveViewModel
   
   @Environment(\.sceneFactory) private var sceneFactory
@@ -37,7 +38,7 @@ struct PaymentArchiveView: View {
   private var presentedModal: Modal? = nil
 
   init(viewModel: PaymentArchiveViewModel) {
-    self.viewModel = viewModel
+    _viewModel = .init(initialValue: viewModel)
   }
 
   var body: some View {
@@ -68,20 +69,37 @@ struct PaymentArchiveView: View {
               showDemoAction: { print("Show Demo!") }
             )
           )
-        case .listView(let payments, let currency, let selectedAccountId):
-          List(payments, id: \.id) { payment in
-            Button(action: {
-              presentedModal = .updatePayment(.editPayment(payment))
-            }) {
-              PaymentView(
-                payment: payment,
-                currency: currency,
-                colors: paymentViewColors
-              )
-              .frame(maxWidth: .infinity)
-              .contentShape(Rectangle())
+        case let .listView(
+          paymentGroups,
+          currency,
+          selectedAccountId
+        ):
+          List(paymentGroups, id: \.id) { paymentGroup in
+            switch paymentGroup.kind {
+            case .monthlyStats:
+              Section {
+                PeriodicalExpenseView(paymentGroup: paymentGroup)
+              }
+              
+            case .dailyPayments:
+              Section {
+                PeriodicalExpenseView(paymentGroup: paymentGroup)
+                ForEach(paymentGroup.payments, id: \.id) { payment in
+                  Button(action: {
+                    presentedModal = .updatePayment(.editPayment(payment))
+                  }) {
+                    PaymentView(
+                      payment: payment,
+                      currency: currency,
+                      colors: paymentViewColors
+                    )
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                  }
+                  .buttonStyle(PlainButtonStyle())
+                }
+              }
             }
-            .buttonStyle(PlainButtonStyle())
           }
           .overlay {
             CircleButton(

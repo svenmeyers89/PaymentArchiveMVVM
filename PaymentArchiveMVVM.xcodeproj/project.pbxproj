@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9C13A1802F38C224000263FF /* AsyncOperators in Frameworks */ = {isa = PBXBuildFile; productRef = 9C13A17F2F38C224000263FF /* AsyncOperators */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		9C9E36E12E2D2F3F009F86BB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9C13A1802F38C224000263FF /* AsyncOperators in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +77,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9C13A17E2F38C224000263FF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		9C9E36C92E2D2F3E009F86BB = {
 			isa = PBXGroup;
 			children = (
 				9C9E36D42E2D2F3E009F86BB /* PaymentArchiveMVVM */,
 				9C9E36E32E2D2F3F009F86BB /* PaymentArchiveMVVMTests */,
 				9C9E36ED2E2D2F3F009F86BB /* PaymentArchiveMVVMUITests */,
+				9C13A17E2F38C224000263FF /* Frameworks */,
 				9C9E36D32E2D2F3E009F86BB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -112,6 +125,7 @@
 			);
 			name = PaymentArchiveMVVM;
 			packageProductDependencies = (
+				9C13A17F2F38C224000263FF /* AsyncOperators */,
 			);
 			productName = PaymentArchiveMVVM;
 			productReference = 9C9E36D22E2D2F3E009F86BB /* PaymentArchiveMVVM.app */;
@@ -195,6 +209,9 @@
 			);
 			mainGroup = 9C9E36C92E2D2F3E009F86BB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9C13A17D2F38C1AB000263FF /* XCLocalSwiftPackageReference "Packages/AsyncOperators" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9C9E36D32E2D2F3E009F86BB /* Products */;
 			projectDirPath = "";
@@ -585,6 +602,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		9C13A17D2F38C1AB000263FF /* XCLocalSwiftPackageReference "Packages/AsyncOperators" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/AsyncOperators;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9C13A17F2F38C224000263FF /* AsyncOperators */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AsyncOperators;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9C9E36CA2E2D2F3E009F86BB /* Project object */;
 }
