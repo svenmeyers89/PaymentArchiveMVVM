@@ -14,13 +14,13 @@ final class PaymentArchiveCategorySelector {
   
   private let stream: MainSingleAsyncStream<Set<Payment.Category>>
   
-  var selectedPaymentCategories: Set<Payment.Category> {
+  var currentlySelectedPaymentCategories: Set<Payment.Category> {
     stream.value
   }
 
-  var selectionStream: AsyncStream<Set<Payment.Category>> {
+  lazy var selectionStream: AsyncStream<Set<Payment.Category>> = {
     stream.stream
-  }
+  }()
   
   init(
     allPaymentCategories: [Payment.Category],

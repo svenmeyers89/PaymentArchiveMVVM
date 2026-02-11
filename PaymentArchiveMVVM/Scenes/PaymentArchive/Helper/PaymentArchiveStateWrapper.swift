@@ -16,7 +16,7 @@ final class PaymentArchiveStateWrapper {
     case shouldLoadList(paymentGroups: [PaymentGroup], currency: Currency, selectedAccountId: String)
   }
 
-  private(set) var state: WrappedState = .missingInitialState
+  private(set) var wrappedState: WrappedState = .missingInitialState
   
   private let paymentArchive: PaymentArchive
   private let paymentGroupBuilder: PaymentArchiveGroupBuilder
@@ -67,12 +67,12 @@ final class PaymentArchiveStateWrapper {
     selectedPaymentCategories: Set<Payment.Category>
   ) async {
     guard let state else {
-      self.state = .missingInitialState
+      self.wrappedState = .missingInitialState
       return
     }
     
     guard let selectedAccount = state.selectedAccount else {
-      self.state = .shouldOnboard
+      self.wrappedState = .shouldOnboard
       return
     }
     
@@ -81,6 +81,6 @@ final class PaymentArchiveStateWrapper {
     let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
     let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
     
-    self.state = .shouldLoadList(paymentGroups: paymentGroups, currency: selectedAccount.currency, selectedAccountId: selectedAccount.id)
+    self.wrappedState = .shouldLoadList(paymentGroups: paymentGroups, currency: selectedAccount.currency, selectedAccountId: selectedAccount.id)
   }
 }

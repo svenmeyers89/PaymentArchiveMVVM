@@ -5,6 +5,8 @@
 //  Created by Sven Majeric on 10.02.2026..
 //
 
+/// Utility handler for a single stream.
+/// In case of multiple consumers, use Broadcaster instead.
 @MainActor
 public final class MainSingleAsyncStream<T: Sendable> {
   private var continuation: AsyncStream<T>.Continuation?

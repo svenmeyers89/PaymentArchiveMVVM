@@ -14,7 +14,7 @@ final class PaymentArchiveViewModel {
       return .error(errorMessage)
     }
     
-    let state = stateWrapper.state
+    let state = stateWrapper.wrappedState
     
     switch state {
     case .missingInitialState:
@@ -31,7 +31,7 @@ final class PaymentArchiveViewModel {
   }
   
   var selectedPaymentCategories: Set<Payment.Category> {
-    paymentArchiveCategorySelector.selectedPaymentCategories
+    paymentArchiveCategorySelector.currentlySelectedPaymentCategories
   }
   
   private var errorMessage: String?

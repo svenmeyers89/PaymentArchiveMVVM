@@ -7,6 +7,10 @@
 
 import Foundation
 
+/// Broadcaster simulates a shared stream for multiple consumers.
+///
+/// The mechanism is based on caching continuations for each stream.
+/// Each new event is emitted to every continuation.
 @MainActor
 public final class MainBroadcaster<T: Sendable> {
   private var continuations: [UUID: AsyncStream<T>.Continuation] = [:]

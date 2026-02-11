@@ -37,6 +37,38 @@ func runCombineLatestTest() {
   }
 }
 
+// MARK: - Composition
+
+func runCompositionCombineLatestTest() {
+  let streamA = makeStream(label: "A", values: [1, 2, 3, 4, 5, 6], delayNanoseconds: 250_000_000)
+  let streamB = makeStream(label: "B", values: [10, 20, 30], delayNanoseconds: 450_000_000)
+  let streamC = makeStream(label: "C", values: [100, 200, 300], delayNanoseconds: 600_000_000)
+  
+  Task {
+    do {
+      let compositionStream =
+        combineLatest(
+          streamA,
+          combineLatest(
+            streamB,
+            streamC
+          )
+        )
+        .map { (a, tupple) in (a, tupple.0, tupple.1) }
+      
+      for try await (a, b, c) in compositionStream {
+        print("composition - combineLatest -> (\(a), \(b), \(c))")
+      }
+      
+      print("composition - combineLatest finished")
+      PlaygroundPage.current.finishExecution()
+    } catch {
+      print("composition - combineLatest error: \(error)")
+      PlaygroundPage.current.finishExecution()
+    }
+  }
+}
+
 // MARK: - MainAsyncStream
 
 actor CounterTracker {
@@ -135,15 +167,18 @@ func runBroadcasterTest() {
 
 enum PlaygroundTest {
   case combineLatest
+  case composition
   case broadcaster
   case singleStream
 }
 
-let activeTest: PlaygroundTest = .singleStream
+let activeTest: PlaygroundTest = .composition
 
 switch activeTest {
 case .combineLatest:
   runCombineLatestTest()
+case .composition:
+  runCompositionCombineLatestTest()
 case .broadcaster:
   runBroadcasterTest()
 case .singleStream:
