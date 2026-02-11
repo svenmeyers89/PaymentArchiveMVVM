@@ -22,13 +22,11 @@ public final class MainSingleAsyncStream<T: Sendable> {
   public lazy var stream: AsyncStream<T> = {
     AsyncStream { continuation in
       self.continuation = continuation
-      print("### Did create continuation!")
       
       continuation.yield(value)
       
       continuation.onTermination = { [weak self] _ in
         Task { @MainActor in
-          print("### Terminating!")
           self?.continuation = nil
         }
       }

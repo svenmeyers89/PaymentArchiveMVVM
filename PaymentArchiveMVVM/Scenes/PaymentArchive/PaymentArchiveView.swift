@@ -38,7 +38,7 @@ struct PaymentArchiveView: View {
   private var presentedModal: Modal? = nil
 
   init(viewModel: PaymentArchiveViewModel) {
-    self.viewModel = viewModel
+    _viewModel = .init(initialValue: viewModel)
   }
 
   var body: some View {

@@ -17,7 +17,7 @@ struct EditPaymentView: View {
   @Environment(\.dismiss) private var dismiss
 
   init(viewModel: EditPaymentViewModel) {
-    self.viewModel = viewModel
+    _viewModel = .init(initialValue: viewModel)
   }
 
   var body: some View {

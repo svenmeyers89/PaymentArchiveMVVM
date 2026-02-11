@@ -27,8 +27,7 @@ public final class MainBroadcaster<T: Sendable> {
     AsyncStream { continuation in
       let id = UUID()
       continuations[id] = continuation
-      
-      print("## Added a new continuation with id: \(id)")
+
       continuation.yield(value)
       
       continuation.onTermination = { [weak self] _ in
