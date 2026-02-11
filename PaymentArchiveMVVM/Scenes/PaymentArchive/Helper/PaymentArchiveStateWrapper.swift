@@ -77,7 +77,6 @@ final class PaymentArchiveStateWrapper {
     }
     
     let allPayments: [Payment] = state.payments[selectedAccount.id] ?? []
-    let selectedPaymentCategories = selectedPaymentCategories
     let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
     let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
     
