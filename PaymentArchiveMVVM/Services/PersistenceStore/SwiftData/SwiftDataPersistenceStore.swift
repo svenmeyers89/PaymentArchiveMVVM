@@ -8,12 +8,18 @@
 import Foundation
 import SwiftData
 
-enum SwiftDataPersistenceStoreError: Error {
+enum SwiftDataPersistenceStoreError: Error, Equatable {
   case missingDomainParameters
   case invalidDataStoreState
+  case missingApplicationSupportDirectory
 }
 
 actor SwiftDataPersistenceStore {
+  enum DataBaseConfiguration {
+    case inMemory
+    case persisted(locationResolver: SwiftDataStoreLocationResolver)
+  }
+
   private let container: ModelContainer
   
   /// Important:
@@ -24,11 +30,23 @@ actor SwiftDataPersistenceStore {
   private lazy var context: ModelContext = {
     .init(container)
   }()
-  
-  init(isStoredInMemoryOnly: Bool = false) throws {
+
+  init(
+    dataBaseConfiguration: DataBaseConfiguration
+  ) throws {
+    let modelConfiguration: ModelConfiguration = try {
+      switch dataBaseConfiguration {
+      case .inMemory:
+        return .init(isStoredInMemoryOnly: true)
+      case .persisted(let locationResolver):
+        let resolvedURL = try locationResolver.storeURL()
+        return .init(url: resolvedURL)
+      }
+    }()
+
     self.container = try ModelContainer(
       for: AccountRecord.self, PaymentRecord.self,
-      configurations: .init(isStoredInMemoryOnly: isStoredInMemoryOnly)
+      configurations: modelConfiguration
     )
   }
 }
