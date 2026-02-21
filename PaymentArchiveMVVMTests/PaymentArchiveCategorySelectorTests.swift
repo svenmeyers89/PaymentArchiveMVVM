@@ -55,4 +55,38 @@ struct PaymentArchiveCategorySelectorTests {
     try await Task.sleep(nanoseconds: 50_000_000)
     await categorySelector.didConfirmSelection(paymentCategories: categories)
   }
+  
+  @MainActor
+  @Test func testPaymentArchiveCategorySelectorWithIterator() async throws {
+    let categorySelector = PaymentArchiveCategorySelector(
+      allPaymentCategories: [.groceries, .accommodation, .shopping, .transport],
+      selectedPaymentCategories: .init()
+    )
+    
+    #expect(categorySelector.currentlySelectedPaymentCategories.isEmpty)
+    
+    let updates: [Set<Payment.Category>] = [
+      .init([.groceries]),
+      .init([.groceries, .shopping]),
+      .init([.accommodation])
+    ]
+    
+    // Update before making iterator
+    categorySelector.didConfirmSelection(paymentCategories: updates[0])
+    
+    var iterator = categorySelector.selectionStream.makeAsyncIterator()
+    
+    let value = await iterator.next()
+    #expect(value == .some(updates[0]))
+    
+    categorySelector.didConfirmSelection(paymentCategories: updates[1])
+    let nextValue = await iterator.next()
+    #expect(nextValue == .some(updates[1]))
+    
+    categorySelector.didConfirmSelection(paymentCategories: updates[2])
+    let nextNextValue = await iterator.next()
+    #expect(nextNextValue == .some(updates[2]))
+    
+    #expect(categorySelector.currentlySelectedPaymentCategories == updates[2])
+  }
 }
