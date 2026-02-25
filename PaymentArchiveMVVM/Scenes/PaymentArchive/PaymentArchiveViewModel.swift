@@ -47,9 +47,9 @@ final class PaymentArchiveViewModel {
       selectedPaymentCategories: Set<Payment.Category>(Payment.Category.allCases)
     )
     self.stateWrapper = .init(
-      paymentArchive: paymentArchive,
-      paymentGroupBuilder: PaymentArchiveGroupBuilder(),
-      paymentArchiveCategorySelector: paymentArchiveCategorySelector
+      paymentArchiveStateStream: paymentArchive.makeStateStream(),
+      selectedPaymentCategoriesStream: paymentArchiveCategorySelector.selectionStream,
+      paymentGroupBuilder: PaymentArchiveGroupBuilder()
     )
   }
 

@@ -11,7 +11,7 @@ import Observation
 
 @MainActor
 final class PaymentArchive: Sendable {
-  struct State {
+  struct State: Equatable, Sendable {
     fileprivate(set) var selectedAccountId: String?
     fileprivate(set) var accounts: [String: Account]
     fileprivate(set) var payments: [String: [Payment]]
