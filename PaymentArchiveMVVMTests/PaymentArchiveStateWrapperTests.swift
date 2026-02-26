@@ -18,45 +18,60 @@ struct PaymentArchiveStateWrapperTests {
   func testStateWrapperUpdates() async throws {
     let (stateStream, stateContinuation) = AsyncStream<PaymentArchive.State?>.makeStream()
     let (selectorStream, selectorContinuation) = AsyncStream<Set<Payment.Category>>.makeStream()
-    
-    let (wrappedStateStream, wrappedStateContinuation) = AsyncStream<PaymentArchiveStateWrapper.WrappedState>.makeStream()
-    
+
     let wrapper = PaymentArchiveStateWrapper(
       paymentArchiveStateStream: stateStream,
       selectedPaymentCategoriesStream: selectorStream,
       paymentGroupBuilder: PaymentArchiveGroupBuilder()
     )
     
+    // Testing initial state
     #expect(wrapper.wrappedState == .missingInitialState)
     
-    var iterator = wrappedStateStream.makeAsyncIterator()
-
-    selectorContinuation.yield(.init([.groceries, .accommodation, .presents]))
+    await testTransitionToOnboardState(using: wrapper, stateContinuation: stateContinuation, selectorContinuation: selectorContinuation)
     
-    // selecting categories takes no effect at this stage
-    //await awaitWrappedState(.missingInitialState, in: wrapper)
-   // #expect(wrappedState == .missingInitialState)
+    await testTransitionToEmptyListState(using: wrapper, stateContinuation: stateContinuation, selectorContinuation: selectorContinuation)
+  }
+  
+  @MainActor
+  private func testTransitionToOnboardState(
+    using wrapper: PaymentArchiveStateWrapper,
+    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation,
+    selectorContinuation: AsyncStream<Set<Payment.Category>>.Continuation
+  ) async {
+    let (changeTrackerStream, changeTrackerContinuation) = AsyncStream<Void>.makeStream()
     
-    emitNextWrapperState(from: wrapper, on: wrappedStateContinuation)
-    stateContinuation.yield(
-      .init(
-        selectedAccountId: nil,
-        accounts: [:],
-        payments: [:]
-      )
-    )
+    withObservationTracking {
+      _ = wrapper.wrappedState
+    } onChange: {
+      changeTrackerContinuation.yield(())
+    }
     
-    //await awaitWrappedState(.shouldOnboard, in: wrapper)
-    var wrappedState = await iterator.next()
-    #expect(wrappedState == .shouldOnboard)
+    // Load empty state
+    stateContinuation.yield(PaymentArchive.State.empty)
     
-    selectorContinuation.yield(.init([.groceries, .accommodation, .presents, .healthcare]))
+    // Define init selection for wrapperState to combine it with PaymentArchive.State1
+    selectorContinuation.yield([.groceries, .accommodation, .presents])
     
-    // selecting categories takes no effect at this stage
-    //await awaitWrappedState(.shouldOnboard, in: wrapper)
-    //#expect(wrappedState == .shouldOnboard)
+    await expectDidChange(in: changeTrackerStream)
+    #expect(wrapper.wrappedState == .shouldOnboard)
+  }
+  
+  @MainActor
+  private func testTransitionToEmptyListState(
+    using wrapper: PaymentArchiveStateWrapper,
+    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation,
+    selectorContinuation: AsyncStream<Set<Payment.Category>>.Continuation
+  ) async {
+    let (changeTrackerStream, changeTrackerContinuation) = AsyncStream<Void>.makeStream()
     
-    emitNextWrapperState(from: wrapper, on: wrappedStateContinuation)
+    withObservationTracking {
+      _ = wrapper.wrappedState
+    } onChange: {
+      changeTrackerContinuation.yield(())
+    }
+    
+    // Load empty list
     stateContinuation.yield(
       .init(
         selectedAccountId: "1",
@@ -69,43 +84,30 @@ struct PaymentArchiveStateWrapperTests {
         payments: [:]
       ))
     
-//    await awaitWrappedState(
-//      .shouldLoadList(paymentGroups: [], currency: Currency.eur, selectedAccountId: "1"),
-//      in: wrapper
-//    )
-    wrappedState = await iterator.next()
-    #expect(wrappedState == .shouldLoadList(paymentGroups: [], currency: Currency.eur, selectedAccountId: "1"))
+    await expectDidChange(in: changeTrackerStream)
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: [], currency: Currency.eur, selectedAccountId: "1"))
   }
   
   @MainActor
-  private func emitNextWrapperState(
-    from wrapper: PaymentArchiveStateWrapper,
-    on continuation: AsyncStream<PaymentArchiveStateWrapper.WrappedState>.Continuation
-  ) {
-    withObservationTracking {
-      _ = wrapper.wrappedState
-    } onChange: {
-      Task { @MainActor in
-        continuation.yield(wrapper.wrappedState)
-      }
-    }
-  }
-  
-  
-  @MainActor
-  private func awaitWrappedState(
-    _ expected: PaymentArchiveStateWrapper.WrappedState,
-    in wrapper: PaymentArchiveStateWrapper,
-    timeout: Duration = .seconds(1),
-    pollIntervalNanoseconds: UInt64 = 10_000_000
+  private func expectDidChange(
+    in stream: AsyncStream<Void>,
+    timeout: Duration = .seconds(1)
   ) async {
-    let deadline = ContinuousClock.now + timeout
-    while ContinuousClock.now < deadline {
-      if wrapper.wrappedState == expected {
-        return
+    let didChange = await withTaskGroup(of: Bool.self) { group in
+      group.addTask {
+        var iterator = stream.makeAsyncIterator()
+        return await iterator.next() != nil
       }
-      try? await Task.sleep(nanoseconds: pollIntervalNanoseconds)
+      group.addTask {
+        try? await Task.sleep(for: timeout)
+        return false
+      }
+      
+      let result = await group.next() ?? false
+      group.cancelAll()
+      return result
     }
-    #expect(wrapper.wrappedState == expected)
+    
+    #expect(didChange == true)
   }
 }
