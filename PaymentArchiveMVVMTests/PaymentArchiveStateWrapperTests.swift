@@ -10,6 +10,14 @@ import Testing
 @testable import PaymentArchiveMVVM
 
 struct PaymentArchiveStateWrapperTests {
+  private let accountId = "1"
+  private let currency = Currency.eur
+  private let account = Account(
+    id: "1",
+    name: "Test Account",
+    currency: .eur,
+    useBiometry: false
+  )
   private let payments = [
     Payment(accountId: "1", amountMinorUnits: 120, category: .groceries),
     Payment(accountId: "2", amountMinorUnits: 240, category: .groceries),
@@ -32,11 +40,11 @@ struct PaymentArchiveStateWrapperTests {
     
     await testTransitionToOnboardState(using: wrapper, stateContinuation: stateContinuation, selectorContinuation: selectorContinuation)
     
-    await testTransitionToEmptyListState(using: wrapper, stateContinuation: stateContinuation, selectorContinuation: selectorContinuation)
+    await testTransitionToEmptyListState(using: wrapper, stateContinuation: stateContinuation)
     
-    await testTransitionToListWithPaymentsState(using: wrapper, stateContinuation: stateContinuation, selectorContinuation: selectorContinuation)
+    await testTransitionToListWithPaymentsState(using: wrapper, stateContinuation: stateContinuation)
     
-    await testTransitionToListWithFilteredPaymentsByGroceriesState(using: wrapper, stateContinuation: stateContinuation, selectorContinuation: selectorContinuation)
+    await testTransitionToListWithFilteredPaymentsByGroceriesState(using: wrapper, selectorContinuation: selectorContinuation)
   }
   
   @MainActor
@@ -66,8 +74,7 @@ struct PaymentArchiveStateWrapperTests {
   @MainActor
   private func testTransitionToEmptyListState(
     using wrapper: PaymentArchiveStateWrapper,
-    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation,
-    selectorContinuation: AsyncStream<Set<Payment.Category>>.Continuation
+    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation
   ) async {
     let (changeTrackerStream, changeTrackerContinuation) = AsyncStream<Void>.makeStream()
     
@@ -80,25 +87,19 @@ struct PaymentArchiveStateWrapperTests {
     // Load empty list
     stateContinuation.yield(
       .init(
-        selectedAccountId: "1",
-        accounts: ["1": .init(
-          id: "1",
-          name: "Test Account",
-          currency: Currency.eur,
-          useBiometry: false
-        )],
+        selectedAccountId: accountId,
+        accounts: [accountId: account],
         payments: [:]
       ))
     
     await expectDidChange(in: changeTrackerStream)
-    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: [], currency: Currency.eur, selectedAccountId: "1"))
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: [], currency: currency, selectedAccountId: accountId))
   }
   
   @MainActor
   private func testTransitionToListWithPaymentsState(
     using wrapper: PaymentArchiveStateWrapper,
-    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation,
-    selectorContinuation: AsyncStream<Set<Payment.Category>>.Continuation
+    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation
   ) async {
     let (changeTrackerStream, changeTrackerContinuation) = AsyncStream<Void>.makeStream()
     
@@ -111,27 +112,21 @@ struct PaymentArchiveStateWrapperTests {
     // Load list with payments
     stateContinuation.yield(
       .init(
-        selectedAccountId: "1",
-        accounts: ["1": .init(
-          id: "1",
-          name: "Test Account",
-          currency: Currency.eur,
-          useBiometry: false
-        )],
-        payments: ["1": payments]
+        selectedAccountId: accountId,
+        accounts: [accountId: account],
+        payments: [accountId: payments]
       ))
     
     await expectDidChange(in: changeTrackerStream)
     
-    let paymentGroups: [PaymentGroup] = await PaymentArchiveGroupBuilder().groupPayments(using: payments, currency: Currency.eur)
+    let paymentGroups: [PaymentGroup] = await PaymentArchiveGroupBuilder().groupPayments(using: payments, currency: currency)
     
-    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: Currency.eur, selectedAccountId: "1"))
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: currency, selectedAccountId: accountId))
   }
   
   @MainActor
   private func testTransitionToListWithFilteredPaymentsByGroceriesState(
     using wrapper: PaymentArchiveStateWrapper,
-    stateContinuation: AsyncStream<PaymentArchive.State?>.Continuation,
     selectorContinuation: AsyncStream<Set<Payment.Category>>.Continuation
   ) async {
     let (changeTrackerStream, changeTrackerContinuation) = AsyncStream<Void>.makeStream()
@@ -150,10 +145,10 @@ struct PaymentArchiveStateWrapperTests {
     let paymentGroups: [PaymentGroup] = await PaymentArchiveGroupBuilder()
       .groupPayments(
         using: payments.filter { $0.category == .groceries },
-        currency: Currency.eur
+        currency: currency
       )
     
-    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: Currency.eur, selectedAccountId: "1"))
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: currency, selectedAccountId: accountId))
   }
   
   @MainActor
