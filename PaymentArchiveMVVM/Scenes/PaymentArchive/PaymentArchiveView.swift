@@ -101,7 +101,7 @@ struct PaymentArchiveView: View {
               }
             }
           }
-          .overlay {
+          .overlay(alignment: .bottomTrailing) {
             CircleButton(
               size: 70, iconName: "plus",
               colors: circleButtonColors
@@ -110,6 +110,8 @@ struct PaymentArchiveView: View {
                 .addNewPayment(selectedAccountId: selectedAccountId)
               )
             }
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
           }
         }
       }
