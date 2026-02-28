@@ -28,8 +28,7 @@ struct CircleButton: View {
         }
       }) {
         ZStack {
-          Circle()
-            .fill(colors.background)
+          buttonBackground
             .frame(width: size, height: size)
             .shadow(radius: 10)
           Image(systemName: iconName)
@@ -51,6 +50,19 @@ struct CircleButton: View {
       )
       .disabled(isBouncing)
     }
+}
+
+extension CircleButton {
+  @ViewBuilder
+  private var buttonBackground: some View {
+    let baseCircle = Circle().fill(colors.background)
+    
+    if #available(iOS 26.0, *) {
+      baseCircle.glassEffect()
+    } else {
+      baseCircle
+    }
+  }
 }
 
 extension CircleButton {
