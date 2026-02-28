@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PaymentGroup {
+struct PaymentGroup: Equatable, Sendable {
   enum Kind {
     case monthlyStats
     case dailyPayments

@@ -10,7 +10,7 @@ import Observation
 
 @MainActor @Observable
 final class PaymentArchiveStateWrapper {
-  enum WrappedState {
+  enum WrappedState: Sendable, Equatable {
     case missingInitialState
     case shouldOnboard
     case shouldLoadList(paymentGroups: [PaymentGroup], currency: Currency, selectedAccountId: String)
@@ -18,9 +18,7 @@ final class PaymentArchiveStateWrapper {
 
   private(set) var wrappedState: WrappedState = .missingInitialState
   
-  private let paymentArchive: PaymentArchive
   private let paymentGroupBuilder: PaymentArchiveGroupBuilder
-  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
   
   /// deinit doesn't necessarily happen on Main thread...
   ///
@@ -30,16 +28,18 @@ final class PaymentArchiveStateWrapper {
   private var task: Task<Void, Never>?
   
   init(
-    paymentArchive: PaymentArchive,
-    paymentGroupBuilder: PaymentArchiveGroupBuilder,
-    paymentArchiveCategorySelector: PaymentArchiveCategorySelector
+    paymentArchiveStateStream: AsyncStream<PaymentArchive.State?>,
+    selectedPaymentCategoriesStream: AsyncStream<Set<Payment.Category>>,
+    paymentGroupBuilder: PaymentArchiveGroupBuilder
   ) {
-    self.paymentArchive = paymentArchive
     self.paymentGroupBuilder = paymentGroupBuilder
-    self.paymentArchiveCategorySelector = paymentArchiveCategorySelector
     
     task = Task { [weak self] in
-      await self?.observe()
+      await self?
+        .observe(
+          paymentArchiveStateStream: paymentArchiveStateStream,
+          selectedPaymentCategoriesStream: selectedPaymentCategoriesStream
+        )
     }
   }
   
@@ -47,10 +47,13 @@ final class PaymentArchiveStateWrapper {
     task?.cancel()
   }
 
-  private func observe() async {
+  private func observe(
+    paymentArchiveStateStream: AsyncStream<PaymentArchive.State?>,
+    selectedPaymentCategoriesStream: AsyncStream<Set<Payment.Category>>
+  ) async {
     let combinedStream = combineLatest(
-      paymentArchive.makeStateStream(),
-      paymentArchiveCategorySelector.selectionStream
+      paymentArchiveStateStream,
+      selectedPaymentCategoriesStream
     )
     
     do {
