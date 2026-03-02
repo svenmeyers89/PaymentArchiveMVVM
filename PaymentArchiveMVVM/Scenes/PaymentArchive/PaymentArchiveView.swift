@@ -184,7 +184,7 @@ struct PaymentArchiveView: View {
 extension PaymentArchiveView {
   private var categoryIconColors: CategoryIcon.Colors {
     .init(
-      iconBackground: theme.highlight.icon,
+      iconBackground: theme.background.box,
       iconTint: theme.highlight.tint
     )
   }
