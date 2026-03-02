@@ -184,14 +184,13 @@ struct PaymentArchiveView: View {
 extension PaymentArchiveView {
   private var categoryIconColors: CategoryIcon.Colors {
     .init(
-      iconBackground: theme.background.box,
+      iconBackground: theme.selector.background,
       iconTint: theme.highlight.tint
     )
   }
   
   var paymentViewColors: PaymentView.Colors {
     .init(
-      background: theme.background.primary,
       categoryIcon: categoryIconColors,
       paymentDateTime: theme.text.secondary,
       categoryName: theme.text.primary,
@@ -201,7 +200,6 @@ extension PaymentArchiveView {
 
   var emptyArchiveViewColors: EmptyArchiveView.Colors {
     .init(
-      background: theme.background.primary,
       icon: theme.highlight.tint,
       title: theme.text.primary,
       description: theme.text.primary,
@@ -221,10 +219,8 @@ extension PaymentArchiveView {
       categoryIcon: categoryIconColors,
       categoryListItem: .init(
         title: theme.text.primary,
-        background: theme.background.primary,
         toggle: theme.toggle.tint
-      ),
-      background: theme.background.primary
+      )
     )
   }
 }

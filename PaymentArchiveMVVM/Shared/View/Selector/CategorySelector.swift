@@ -46,7 +46,6 @@ struct CategorySelector: View {
         }
       }
       .padding(.horizontal)
-      .background(colors.background)
       // Need bottom and top padding so that buttons are not clipped when highlighted or when scrolled
       .padding(.bottom, 16)
       .padding(.top, 8)
@@ -60,7 +59,6 @@ extension CategorySelector {
     let categoryTitle: Color
     let categoryBackground: Color
     let selectedCategoryBorder: Color
-    let background: Color
   }
 }
 
@@ -76,8 +74,7 @@ extension CategorySelector {
       ),
       categoryTitle: .black,
       categoryBackground: .gray,
-      selectedCategoryBorder: .yellow,
-      background: .green
+      selectedCategoryBorder: .yellow
     )
   )
 }

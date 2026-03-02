@@ -35,15 +35,10 @@ struct ChangeThemeView: View {
       .buttonStyle(.plain)
       .padding(.horizontal, 12)
     }
-    .background(backgroundColor)
   }
 }
 
 extension ChangeThemeView {
-  var backgroundColor: Color {
-    selectedTheme.colorPalette.background.primary
-  }
-  
   var themeTitleColor: Color {
     selectedTheme.colorPalette.text.primary
   }
@@ -53,7 +48,7 @@ extension ChangeThemeView {
   }
   
   var themeBoxColor: Color {
-    selectedTheme.colorPalette.background.header
+    selectedTheme.colorPalette.selector.background
   }
 }
 

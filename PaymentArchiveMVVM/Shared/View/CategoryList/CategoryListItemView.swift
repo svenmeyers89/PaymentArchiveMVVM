@@ -31,7 +31,6 @@ struct CategoryListItemView: View {
   
   struct Colors {
     let title: Color
-    let background: Color
     let toggle: Color
   }
   
@@ -62,7 +61,6 @@ struct CategoryListItemView: View {
       Toggle("", isOn: $isSelected)
         .tint(colors.toggle)
     }
-    .background(colors.background)
   }
 }
 
@@ -75,7 +73,6 @@ struct CategoryListItemView: View {
       itemType: .allCategories,
       colors: .init(
         title: systemColors.text.primary,
-        background: systemColors.background.primary,
         toggle: systemColors.toggle.tint
       ),
       isSelected: $isSelected
@@ -90,7 +87,6 @@ struct CategoryListItemView: View {
       ),
       colors: .init(
         title: systemColors.text.primary,
-        background: systemColors.background.primary,
         toggle: systemColors.toggle.tint
       ),
       isSelected: $isSelected

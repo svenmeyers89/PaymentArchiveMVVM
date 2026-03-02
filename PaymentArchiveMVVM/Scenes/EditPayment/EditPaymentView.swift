@@ -71,7 +71,6 @@ struct EditPaymentView: View {
           Spacer()
         }
         .padding(.horizontal, 24)
-        .background(backgroundColor)
       },
       completion: {
         self.toastMessage = nil
@@ -81,13 +80,8 @@ struct EditPaymentView: View {
 }
 
 extension EditPaymentView {
-  var backgroundColor: Color {
-    theme.background.primary
-  }
-  
   var moneyAmountTextFieldColors: MoneyAmountTextField.Colors {
     .init(
-      background: theme.background.primary,
       title: theme.text.primary,
       textField: theme.text.secondary,
       currency: theme.text.primary
@@ -102,8 +96,7 @@ extension EditPaymentView {
       ),
       categoryTitle: theme.selector.title,
       categoryBackground: theme.selector.background,
-      selectedCategoryBorder: theme.selector.border,
-      background: theme.background.primary
+      selectedCategoryBorder: theme.selector.border
     )
   }
 }

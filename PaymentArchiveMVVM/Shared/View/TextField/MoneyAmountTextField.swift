@@ -42,7 +42,6 @@ struct MoneyAmountTextField: View {
           .foregroundStyle(colors.currency)
       }
     }
-    .background(colors.background)
     .onAppear {
       text = formattedAmount(from: amountMinorUnits)
     }
@@ -71,7 +70,6 @@ struct MoneyAmountTextField: View {
 
 extension MoneyAmountTextField {
   struct Colors {
-    let background: Color
     let title: Color
     let textField: Color
     let currency: Color
@@ -84,7 +82,6 @@ extension MoneyAmountTextField {
     amountMinorUnits: $amount,
     currency: Currency.yen,
     colors: .init(
-      background: .green,
       title: .black,
       textField: .orange,
       currency: .black

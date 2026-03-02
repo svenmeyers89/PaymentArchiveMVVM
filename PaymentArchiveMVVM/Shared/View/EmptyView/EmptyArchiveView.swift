@@ -53,13 +53,11 @@ struct EmptyArchiveView: View {
         .padding()
       }
     }
-    .background(colors.background)
   }
 }
 
 extension EmptyArchiveView {
   struct Colors {
-    let background: Color
     let icon: Color
     let title: Color
     let description: Color
@@ -70,7 +68,6 @@ extension EmptyArchiveView {
 #Preview {
   EmptyArchiveView(
     colors: .init(
-      background: .primary,
       icon: .blue,
       title: .primary,
       description: .primary,

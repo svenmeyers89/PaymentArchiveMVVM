@@ -38,8 +38,8 @@ struct EditAccountView: View {
             .padding(.bottom, 24)
             .padding(.horizontal, 8)
             
-            VStack(spacing: 12) {
-              TextField("Currency", text: $viewModel.currencyCode)
+          VStack(spacing: 12) {
+            TextField("Currency", text: $viewModel.currencyCode)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .foregroundStyle(textFieldTextColor)
                 .disabled(viewModel.isEditingCurrencyDisabled)
@@ -57,7 +57,6 @@ struct EditAccountView: View {
             Spacer()
           }
           .padding()
-          .background(backgroundColor)
         } completion: {
           self.toastMessage = nil
         }
@@ -100,10 +99,6 @@ struct EditAccountView: View {
 }
 
 extension EditAccountView {
-  var backgroundColor: Color {
-    theme.background.primary
-  }
-  
   var textFieldTextColor: Color {
     theme.text.primary
   }
@@ -113,12 +108,11 @@ extension EditAccountView {
   }
   
   var biometricToggleSwitchColor: Color {
-    theme.highlight.tint
+    theme.toggle.tint
   }
   
   var currencySelectorColors: CurrencySelector.Colors {
     .init(
-      background: theme.background.primary,
       buttonBackground: theme.selector.background,
       buttonText: theme.selector.title
     )

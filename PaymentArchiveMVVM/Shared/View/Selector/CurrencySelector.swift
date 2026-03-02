@@ -31,13 +31,11 @@ struct CurrencySelector: View {
         }
       }
     }
-    .background(colors.background)
   }
 }
 
 extension CurrencySelector {
   struct Colors {
-    let background: Color
     let buttonBackground: Color
     let buttonText: Color
   }
@@ -46,7 +44,7 @@ extension CurrencySelector {
 #Preview {
   CurrencySelector(
     currencies: Currency.predefined,
-    colors: .init(background: .blue, buttonBackground: .yellow, buttonText: .green),
+    colors: .init(buttonBackground: .yellow, buttonText: .green),
     didSelectPredefinedCurrency: { currency in
       print("Did select currency: \(currency)")
     }

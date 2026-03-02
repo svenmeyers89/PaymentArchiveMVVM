@@ -12,7 +12,6 @@ struct CategoryListView: View {
   struct Colors {
     let categoryIcon: CategoryIcon.Colors
     let categoryListItem: CategoryListItemView.Colors
-    let background: Color
   }
   
   @State private var selectedPaymentCategories: Set<Payment.Category>
@@ -86,7 +85,6 @@ struct CategoryListView: View {
         }
       }
     }
-    .background(colors.background)
   }
 }
 
@@ -97,8 +95,7 @@ struct CategoryListView: View {
       selectedPaymentCategories: Set<Payment.Category>([.accommodation]),
       colors: .init(
         categoryIcon: .init(iconBackground: .green, iconTint: .white),
-        categoryListItem: .init(title: .black, background: .white, toggle: .blue),
-        background: .white
+        categoryListItem: .init(title: .black, toggle: .blue)
       )
     ) { selectedPaymentCategories in
       print("Selected categories: \(selectedPaymentCategories)")

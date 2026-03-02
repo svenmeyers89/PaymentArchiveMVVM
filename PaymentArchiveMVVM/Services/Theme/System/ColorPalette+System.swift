@@ -9,11 +9,6 @@ import SwiftUI
 
 extension ColorPalette {
   static let system: ColorPalette = ColorPalette(
-    background: .init(
-      primary: Color(.systemBackground),
-      header: Color(.systemGroupedBackground),
-      box: Color(.secondarySystemGroupedBackground)
-    ),
     text: .init(
       primary: .primary,
       secondary: .secondary,
