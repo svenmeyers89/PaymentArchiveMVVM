@@ -16,7 +16,7 @@ extension ColorPalette {
       caption: Color(.tertiaryLabel)
     ),
     highlight: .init(
-      tint: .blue,
+      background: .blue,
       icon: .white,
       title: .white
     ),

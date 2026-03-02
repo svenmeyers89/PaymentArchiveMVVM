@@ -44,7 +44,7 @@ extension ChangeThemeView {
   }
   
   var checkmarkIconColor: Color {
-    selectedTheme.colorPalette.highlight.tint
+    selectedTheme.colorPalette.highlight.background
   }
   
   var themeBoxColor: Color {

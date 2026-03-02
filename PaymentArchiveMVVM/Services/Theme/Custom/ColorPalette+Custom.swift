@@ -16,7 +16,7 @@ extension ColorPalette {
       caption: Color("TextCaption")
     ),
     highlight: .init(
-      tint: Color("HighlightTint"),
+      background: Color("HighlightBackground"),
       icon: Color("HighlightIcon"),
       title: Color("HighlightTitle")
     ),

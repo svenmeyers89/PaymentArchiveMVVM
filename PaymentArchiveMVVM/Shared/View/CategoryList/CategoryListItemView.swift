@@ -81,7 +81,7 @@ struct CategoryListItemView: View {
       itemType: .paymentCategory(
         .accommodation,
         categoryIconColors: .init(
-          iconBackground: systemColors.highlight.tint,
+          iconBackground: systemColors.highlight.background,
           iconTint: systemColors.highlight.icon
         )
       ),

@@ -16,7 +16,7 @@ struct ColorPalette: Sendable, Equatable {
   }
   
   struct Highlight: Sendable, Equatable {
-    let tint: Color
+    let background: Color
     let icon: Color
     let title: Color
   }

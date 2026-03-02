@@ -185,7 +185,7 @@ extension PaymentArchiveView {
   private var categoryIconColors: CategoryIcon.Colors {
     .init(
       iconBackground: theme.selector.background,
-      iconTint: theme.highlight.tint
+      iconTint: theme.highlight.background
     )
   }
   
@@ -200,7 +200,7 @@ extension PaymentArchiveView {
 
   var emptyArchiveViewColors: EmptyArchiveView.Colors {
     .init(
-      icon: theme.highlight.tint,
+      icon: theme.highlight.background,
       title: theme.text.primary,
       description: theme.text.primary,
       button: theme.text.link
@@ -209,7 +209,7 @@ extension PaymentArchiveView {
   
   var circleButtonColors: CircleButton.Colors {
     .init(
-      background: theme.highlight.tint,
+      background: theme.highlight.background,
       icon: theme.highlight.icon
     )
   }

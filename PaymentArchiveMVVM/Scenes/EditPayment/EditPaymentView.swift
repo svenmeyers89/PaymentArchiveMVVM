@@ -92,7 +92,7 @@ extension EditPaymentView {
     .init(
       categoryIcon: .init(
         iconBackground: theme.highlight.icon,
-        iconTint: theme.highlight.tint
+        iconTint: theme.highlight.background
       ),
       categoryTitle: theme.selector.title,
       categoryBackground: theme.selector.background,
