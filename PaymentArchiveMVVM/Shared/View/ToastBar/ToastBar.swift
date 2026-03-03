@@ -11,8 +11,6 @@ struct ToastBar: View {
   let message: Message
   let colors: Colors
   
-  @State private var isVisible: Bool = false
-  
   var body: some View {
     HStack(alignment: .center) {
       Image(systemName: message.type.icon)
@@ -28,34 +26,23 @@ struct ToastBar: View {
   }
 }
 
-struct ToastContainer<Content: View>: View {
-  @Binding var toastBarMessage: ToastBar.Message?
-  
-  let content: () -> Content
-  let completion: () -> Void
+@MainActor
+private final class AnimationTaskWrapper {
+  var animationTask: Task<Void, Never>?
+}
 
+private struct ToastBarModifier: ViewModifier {
+  @Binding var toastBarMessage: ToastBar.Message?
   let duration: Int
   let colors: ToastBar.Colors
 
-  @State private var isVisible: Bool = false
+  private let hideTaskWrapper: AnimationTaskWrapper = .init()
   
-  init(
-    toastBarMessage: Binding<ToastBar.Message?>,
-    duration: Int = 1,
-    colors: ToastBar.Colors = .default,
-    @ViewBuilder content: @escaping () -> Content,
-    completion: @escaping () -> Void
-  ) {
-    self._toastBarMessage = toastBarMessage
-    self.completion = completion
-    self.duration = duration
-    self.colors = colors
-    self.content = content
-  }
+  @State private var isVisible: Bool = false
 
-  var body: some View {
+  func body(content: Content) -> some View {
     ZStack(alignment: .bottom) {
-      content()
+      content
 
       if let toastBarMessage {
         ToastBar(
@@ -69,22 +56,53 @@ struct ToastContainer<Content: View>: View {
         .onAppear {
           withAnimation(.easeIn(duration: 0.3)) {
             isVisible = true
-          }
-          
-          // Delay before hiding
-          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(duration)) {
-            withAnimation(.easeOut(duration: 0.3)) {
-              isVisible = false
-            }
-            
-            // Remove toast after fade out
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-              completion()
+          } completion: {
+            hideTaskWrapper.animationTask = Task {
+              try? await Task.sleep(nanoseconds: 1_000_000_000)
+              
+              withAnimation(.easeIn(duration: 0.3)) {
+                isVisible = true
+              } completion: {
+                self.toastBarMessage = nil
+              }
             }
           }
         }
+        .onDisappear {
+          hideTaskWrapper.animationTask?.cancel()
+          hideTaskWrapper.animationTask = nil
+        }
       }
     }
+  }
+}
+
+extension View {
+  func toastBar(
+    toastBarMessage: Binding<ToastBar.Message?>,
+    duration: Int = 1,
+    colors: ToastBar.Colors = .default
+  ) -> some View {
+    modifier(
+      ToastBarModifier(
+        toastBarMessage: toastBarMessage,
+        duration: duration,
+        colors: colors
+      )
+    )
+  }
+}
+
+extension Binding where Value == ToastBar.Message? {
+  func showToast(_ message: ToastBar.Message) {
+    wrappedValue = message
+  }
+
+  func showToast(
+    text: String,
+    type: ToastBar.Message.MessageType
+  ) {
+    wrappedValue = .init(text: text, type: type)
   }
 }
 

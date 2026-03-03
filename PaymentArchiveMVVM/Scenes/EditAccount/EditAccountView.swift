@@ -22,77 +22,73 @@ struct EditAccountView: View {
   
   var body: some View {
     NavigationStack {
-      ToastContainer(
-        toastBarMessage: $toastMessage) {
-          VStack(spacing: 8) {
-            TextField("Account name", text: $viewModel.accountName)
+      VStack(spacing: 8) {
+        TextField("Account name", text: $viewModel.accountName)
+          .textFieldStyle(RoundedBorderTextFieldStyle())
+          .foregroundStyle(textFieldTextColor)
+        
+        Toggle(isOn: $viewModel.useBiometry) {
+          Text("Use biometry on app open?")
+            .font(.body)
+        }
+        .foregroundStyle(biometryTitleColor)
+        .tint(biometricToggleSwitchColor)
+        .padding(.bottom, 24)
+        .padding(.horizontal, 8)
+        
+        VStack(spacing: 12) {
+          TextField("Currency", text: $viewModel.currencyCode)
               .textFieldStyle(RoundedBorderTextFieldStyle())
               .foregroundStyle(textFieldTextColor)
-            
-            Toggle(isOn: $viewModel.useBiometry) {
-              Text("Use biometry on app open?")
-                .font(.body)
-            }
-            .foregroundStyle(biometryTitleColor)
-            .tint(biometricToggleSwitchColor)
-            .padding(.bottom, 24)
-            .padding(.horizontal, 8)
-            
-          VStack(spacing: 12) {
-            TextField("Currency", text: $viewModel.currencyCode)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundStyle(textFieldTextColor)
-                .disabled(viewModel.isEditingCurrencyDisabled)
+              .disabled(viewModel.isEditingCurrencyDisabled)
 
-              if !viewModel.isEditingCurrencyDisabled {
-                CurrencySelector(
-                  currencies: Currency.predefined,
-                  colors: currencySelectorColors
-                ) { selectedCurrency in
-                  viewModel.currencyCode = selectedCurrency.code
-                }
-              }
+          if !viewModel.isEditingCurrencyDisabled {
+            CurrencySelector(
+              currencies: Currency.predefined,
+              colors: currencySelectorColors
+            ) { selectedCurrency in
+              viewModel.currencyCode = selectedCurrency.code
             }
-            
-            Spacer()
           }
-          .padding()
-        } completion: {
-          self.toastMessage = nil
         }
-        .toolbar {
-          ToolbarItem(placement: .principal) {
-            Text(viewModel.isEdittingExistingAccount ? "Edit Account" : "New Account")
+        
+        Spacer()
+      }
+      .padding()
+      .toastBar(toastBarMessage: $toastMessage)
+      .toolbar {
+        ToolbarItem(placement: .principal) {
+          Text(viewModel.isEdittingExistingAccount ? "Edit Account" : "New Account")
+        }
+        
+        ToolbarItem(placement: .topBarLeading) {
+          Button("Cancel") {
+            dismiss()
           }
-          
-          ToolbarItem(placement: .topBarLeading) {
-            Button("Cancel") {
-              dismiss()
-            }
-          }
-          
-          ToolbarItem(placement: .topBarTrailing) {
-            Button("Save") {
-              self.isActionInProgress = true
+        }
+        
+        ToolbarItem(placement: .topBarTrailing) {
+          Button("Save") {
+            self.isActionInProgress = true
+            
+            Task {
+              let result = await viewModel.save()
+
+              switch result {
+              case .success:
+                dismiss()
+              case .failure(let error):
+                $toastMessage.showToast(
+                  text: error.message,
+                  type: .error
+                )
+              }
               
-              Task {
-                let result = await viewModel.save()
-
-                switch result {
-                case .success:
-                  dismiss()
-                case .failure(let error):
-                  self.toastMessage = ToastBar.Message(
-                    text: error.message,
-                    type: .error
-                  )
-                }
-                
-                self.isActionInProgress = false
-              }
+              self.isActionInProgress = false
             }
           }
         }
+      }
     }
     .disabled(isActionInProgress)
   }
