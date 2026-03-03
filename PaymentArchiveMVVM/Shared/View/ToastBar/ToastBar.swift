@@ -26,32 +26,6 @@ struct ToastBar: View {
     .background(colors.background)
     .clipShape(.capsule)
   }
-  
-  func animateInAndOut(
-    duration: Int,
-    completion: @escaping () -> Void
-  ) -> some View {
-    self
-      .opacity(isVisible ? 1 : 0)
-      .transition(.opacity)
-      .onAppear {
-        withAnimation(.easeIn(duration: 0.3)) {
-          isVisible = true
-        }
-
-        // Delay before hiding
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(duration)) {
-          withAnimation(.easeOut(duration: 0.3)) {
-            isVisible = false
-          }
-
-          // Remove toast after fade out
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            completion()
-          }
-        }
-    }
-  }
 }
 
 struct ToastContainer<Content: View>: View {
@@ -80,14 +54,16 @@ struct ToastContainer<Content: View>: View {
   }
 
   var body: some View {
-    ZStack {
+    ZStack(alignment: .bottom) {
       content()
 
       if let toastBarMessage {
         ToastBar(
           message: toastBarMessage,
-          colors: ToastBar.Colors.default
+          colors: colors
         )
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .padding(.bottom, 12)
         .opacity(isVisible ? 1 : 0)
         .transition(.opacity)
         .onAppear {
@@ -106,40 +82,6 @@ struct ToastContainer<Content: View>: View {
               completion()
             }
           }
-        }
-      }
-    }
-  }
-}
-
-struct ToastBarPresenter: View {
-  let toastMessage: ToastBar.Message
-  let duration: Int
-  let completion: () -> Void
-  
-  @State private var isVisible: Bool = false
-  
-  var body: some View {
-    ToastBar(
-      message: toastMessage,
-      colors: ToastBar.Colors.default
-    )
-    .opacity(isVisible ? 1 : 0)
-    .transition(.opacity)
-    .onAppear {
-      withAnimation(.easeIn(duration: 0.3)) {
-        isVisible = true
-      }
-      
-      // Delay before hiding
-      DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(duration)) {
-        withAnimation(.easeOut(duration: 0.3)) {
-          isVisible = false
-        }
-        
-        // Remove toast after fade out
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-          completion()
         }
       }
     }
