@@ -30,6 +30,11 @@ extension ColorPalette {
     ),
     toggle: .init(
       tint: .blue
+    ),
+    toastBar: .init(
+      background: .gray,
+      icon: .white,
+      text: .white
     )
   )
 }

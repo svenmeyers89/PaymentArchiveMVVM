@@ -55,7 +55,7 @@ struct EditAccountView: View {
         Spacer()
       }
       .padding()
-      .toastBar(toastBarMessage: $toastMessage)
+      .toastBar(toastBarMessage: $toastMessage, colors: toastBarColors)
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text(viewModel.isEdittingExistingAccount ? "Edit Account" : "New Account")
@@ -78,7 +78,7 @@ struct EditAccountView: View {
               case .success:
                 dismiss()
               case .failure(let error):
-                $toastMessage.showToast(
+                toastMessage = .init(
                   text: error.message,
                   type: .error
                 )
@@ -111,6 +111,14 @@ extension EditAccountView {
     .init(
       buttonBackground: theme.selector.background,
       buttonText: theme.selector.title
+    )
+  }
+  
+  var toastBarColors: ToastBar.Colors {
+    .init(
+      background: theme.toastBar.background,
+      icon: theme.toastBar.icon,
+      text: theme.toastBar.text
     )
   }
 }

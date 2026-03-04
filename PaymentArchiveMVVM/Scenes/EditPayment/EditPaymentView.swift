@@ -52,7 +52,7 @@ struct EditPaymentView: View {
             print("success!")
             dismiss()
           case .failure(let error):
-            $toastMessage.showToast(error.toastBarMessage)
+            toastMessage = error.toastBarMessage
             print("error: \(error)")
           }
         }
@@ -69,7 +69,8 @@ struct EditPaymentView: View {
     .padding(.horizontal, 24)
     .toastBar(
       toastBarMessage: $toastMessage,
-      duration: 3
+      duration: 3,
+      colors: toastBarColors
     )
   }
 }
@@ -92,6 +93,14 @@ extension EditPaymentView {
       categoryTitle: theme.selector.title,
       categoryBackground: theme.selector.background,
       selectedCategoryBorder: theme.selector.border
+    )
+  }
+  
+  var toastBarColors: ToastBar.Colors {
+    .init(
+      background: theme.toastBar.background,
+      icon: theme.toastBar.icon,
+      text: theme.toastBar.text
     )
   }
 }

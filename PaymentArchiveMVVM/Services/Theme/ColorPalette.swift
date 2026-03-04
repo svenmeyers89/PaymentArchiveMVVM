@@ -34,10 +34,17 @@ struct ColorPalette: Sendable, Equatable {
   struct Toggle: Sendable, Equatable {
     let tint: Color
   }
+  
+  struct ToastBar: Sendable, Equatable {
+    let background: Color
+    let icon: Color
+    let text: Color
+  }
 
   let text: Text
   let highlight: Highlight
   let selector: Selector
   let activityIndicator: ActivityIndicator
   let toggle: Toggle
+  let toastBar: ToastBar
 }

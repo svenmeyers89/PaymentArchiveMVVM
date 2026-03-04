@@ -30,6 +30,11 @@ extension ColorPalette {
     ),
     toggle: .init(
       tint: Color("ToggleTint")
+    ),
+    toastBar: .init(
+      background: Color("ToastBarBackground"),
+      icon: Color("ToastBarIcon"),
+      text: Color("ToastBarText")
     )
   )
 }
