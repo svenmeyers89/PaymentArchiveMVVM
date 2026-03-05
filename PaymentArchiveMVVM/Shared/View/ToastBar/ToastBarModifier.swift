@@ -7,6 +7,22 @@
 
 import SwiftUI
 
+extension View {
+  func toastBar(
+    toastBarMessage: Binding<ToastBar.Message?>,
+    duration: Int = 1,
+    colors: ToastBar.Colors
+  ) -> some View {
+    modifier(
+      ToastBarModifier(
+        toastBarMessage: toastBarMessage,
+        duration: duration,
+        colors: colors
+      )
+    )
+  }
+}
+
 @MainActor
 private final class AnimationTaskWrapper {
   var animationTask: Task<Void, Never>?
@@ -55,21 +71,5 @@ private struct ToastBarModifier: ViewModifier {
         }
       }
     }
-  }
-}
-
-extension View {
-  func toastBar(
-    toastBarMessage: Binding<ToastBar.Message?>,
-    duration: Int = 1,
-    colors: ToastBar.Colors
-  ) -> some View {
-    modifier(
-      ToastBarModifier(
-        toastBarMessage: toastBarMessage,
-        duration: duration,
-        colors: colors
-      )
-    )
   }
 }

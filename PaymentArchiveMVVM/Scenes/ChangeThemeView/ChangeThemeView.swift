@@ -19,7 +19,7 @@ struct ChangeThemeView: View {
         },
         label: {
           HStack {
-            Text("\(theme)")
+            Text(theme.name)
               .foregroundStyle(themeTitleColor)
             Spacer()
             if selectedTheme == theme {
@@ -35,6 +35,12 @@ struct ChangeThemeView: View {
       .buttonStyle(.plain)
       .padding(.horizontal, 12)
     }
+  }
+}
+
+extension Theme {
+  fileprivate var name: String {
+    rawValue
   }
 }
 

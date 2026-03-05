@@ -23,7 +23,7 @@ struct CircleButton: View {
           isBouncing.toggle()
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isBouncing.toggle()
-            action() // Trigger the provided action
+            action()
           }
         }
       }) {
@@ -42,10 +42,10 @@ struct CircleButton: View {
       .simultaneousGesture(
         DragGesture(minimumDistance: 0)
           .onChanged { _ in
-            isPressed = true // Shrink on press
+            isPressed = true
           }
           .onEnded { _ in
-            isPressed = false // Reset after press
+            isPressed = false
           }
       )
       .disabled(isBouncing)

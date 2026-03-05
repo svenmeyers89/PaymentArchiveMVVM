@@ -49,11 +49,9 @@ struct EditPaymentView: View {
 
           switch result {
           case .success:
-            print("success!")
             dismiss()
           case .failure(let error):
             toastMessage = error.toastBarMessage
-            print("error: \(error)")
           }
         }
       }

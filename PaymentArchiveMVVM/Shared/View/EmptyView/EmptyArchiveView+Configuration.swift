@@ -39,7 +39,7 @@ extension EmptyArchiveView.Configuration {
     showDemoAction: @MainActor @escaping () -> Void
   ) -> Self {
     .init(
-      title: "Welcome to PaymentArchive blablabla bla bla bla",
+      title: "Welcome to PaymentArchive",
       description: "Please create account to start.\nCheck out demo to see the app's features.",
       iconName: "person.crop.circle.badge.plus",
       buttons: [
@@ -59,7 +59,7 @@ extension EmptyArchiveView.Configuration {
     addPaymentAction: @MainActor @escaping () -> Void
   ) -> Self {
     .init(
-      title: "Your Archive is Empty",
+      title: "Your Archive is empty",
       description: "Add your first payment to get best out of this app.",
       iconName: "clipboard",
       buttons: [
