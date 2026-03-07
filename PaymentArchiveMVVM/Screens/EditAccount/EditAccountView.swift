@@ -95,26 +95,26 @@ struct EditAccountView: View {
 }
 
 extension EditAccountView {
-  var textFieldTextColor: Color {
+  fileprivate var textFieldTextColor: Color {
     theme.text.primary
   }
   
-  var biometryTitleColor: Color {
+  fileprivate var biometryTitleColor: Color {
     theme.text.primary
   }
   
-  var biometricToggleSwitchColor: Color {
+  fileprivate var biometricToggleSwitchColor: Color {
     theme.toggle.tint
   }
   
-  var currencySelectorColors: CurrencySelector.Colors {
+  fileprivate var currencySelectorColors: CurrencySelector.Colors {
     .init(
       buttonBackground: theme.selector.background,
       buttonText: theme.selector.title
     )
   }
   
-  var toastBarColors: ToastBar.Colors {
+  fileprivate var toastBarColors: ToastBar.Colors {
     .init(
       background: theme.toastBar.background,
       icon: theme.toastBar.icon,

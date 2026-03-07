@@ -65,13 +65,6 @@ extension CircleButton {
   }
 }
 
-extension CircleButton {
-  struct Colors {
-    let background: Color
-    let icon: Color
-  }
-}
-
 #Preview {
   CircleButton(
     size: 96,

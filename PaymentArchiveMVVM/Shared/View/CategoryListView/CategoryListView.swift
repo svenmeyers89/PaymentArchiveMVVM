@@ -9,11 +9,6 @@ import Foundation
 import SwiftUI
 
 struct CategoryListView: View {
-  struct Colors {
-    let categoryIcon: CategoryIcon.Colors
-    let categoryListItem: CategoryListItemView.Colors
-  }
-  
   @State private var selectedPaymentCategories: Set<Payment.Category>
   @Environment(\.dismiss) var dismiss
   

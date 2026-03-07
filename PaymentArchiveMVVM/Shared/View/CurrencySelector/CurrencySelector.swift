@@ -1,5 +1,5 @@
 //
-//  PredefinedCurrencySelector.swift
+//  CurrencySelector.swift
 //  PaymentArchiveMVVM
 //
 //  Created by Sven Majeric on 30.09.2025..
@@ -31,13 +31,6 @@ struct CurrencySelector: View {
         }
       }
     }
-  }
-}
-
-extension CurrencySelector {
-  struct Colors {
-    let buttonBackground: Color
-    let buttonText: Color
   }
 }
 

@@ -53,15 +53,6 @@ struct CategorySelector: View {
   }
 }
 
-extension CategorySelector {
-  struct Colors: Sendable {
-    let categoryIcon: CategoryIcon.Colors
-    let categoryTitle: Color
-    let categoryBackground: Color
-    let selectedCategoryBorder: Color
-  }
-}
-
 #Preview {
   @Previewable @State var selectedCategory: Payment.Category? = nil
   CategorySelector(

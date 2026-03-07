@@ -8,11 +8,6 @@
 import SwiftUI
 
 struct CategoryIcon: View {
-  struct Colors: Sendable {
-    let iconBackground: Color
-    let iconTint: Color
-  }
-  
   let iconSystemName: String
   let side: CGFloat
   let colors: Colors

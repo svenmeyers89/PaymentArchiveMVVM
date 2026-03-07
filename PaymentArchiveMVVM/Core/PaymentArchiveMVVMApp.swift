@@ -20,13 +20,13 @@ struct PaymentArchiveMVVMApp: App {
   var body: some Scene {
     WindowGroup {
       dependencyManager
-        .sceneFactory
-        .buildPaymentArchiveScene()
+        .screenFactory
+        .buildPaymentArchiveScreen()
         .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
         .environment(\.setTheme) { newTheme in
           selectedThemeID = newTheme.rawValue
         }
-        .environment(\.sceneFactory, dependencyManager.sceneFactory)
+        .environment(\.screenFactory, dependencyManager.screenFactory)
     }
   }
 }

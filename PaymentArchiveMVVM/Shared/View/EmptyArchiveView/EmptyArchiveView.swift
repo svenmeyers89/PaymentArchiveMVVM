@@ -56,15 +56,6 @@ struct EmptyArchiveView: View {
   }
 }
 
-extension EmptyArchiveView {
-  struct Colors {
-    let icon: Color
-    let title: Color
-    let description: Color
-    let button: Color
-  }
-}
-
 #Preview {
   EmptyArchiveView(
     colors: .init(

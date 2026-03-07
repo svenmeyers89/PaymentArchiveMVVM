@@ -29,11 +29,6 @@ struct CategoryListItemView: View {
     }
   }
   
-  struct Colors {
-    let title: Color
-    let toggle: Color
-  }
-  
   let itemType: ItemType
   let colors: Colors
   @Binding var isSelected: Bool

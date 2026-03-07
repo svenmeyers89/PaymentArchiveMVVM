@@ -1,5 +1,5 @@
 //
-//  SceneFactory.swift
+//  ScreenFactory.swift
 //  PaymentArchiveMVVM
 //
 //  Created by Sven Majeric on 23.08.2025..
@@ -8,20 +8,20 @@
 import SwiftUI
 
 @MainActor
-struct SceneFactory {
+struct ScreenFactory {
   private let paymentArchive: PaymentArchive
   
   init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
   }
   
-  func buildPaymentArchiveScene() -> PaymentArchiveView {
+  func buildPaymentArchiveScreen() -> PaymentArchiveView {
     let viewModel = PaymentArchiveViewModel(paymentArchive: paymentArchive)
     let paymentArchiveView = PaymentArchiveView(viewModel: viewModel)
     return paymentArchiveView
   }
   
-  func buildEditAccountScene(useCase: EditAccountUseCase) -> EditAccountView {
+  func buildEditAccountScreen(useCase: EditAccountUseCase) -> EditAccountView {
     let viewModel = EditAccountViewModel(
       useCase: useCase,
       dataManager: paymentArchive
@@ -30,7 +30,7 @@ struct SceneFactory {
     return editAccountView
   }
   
-  func buildEditPaymentScene(useCase: EditPaymentUseCase) -> EditPaymentView {
+  func buildEditPaymentScreen(useCase: EditPaymentUseCase) -> EditPaymentView {
     let viewModel = EditPaymentViewModel(
       useCase: useCase,
       currency: paymentArchive.currentState!.selectedAccount!.currency,

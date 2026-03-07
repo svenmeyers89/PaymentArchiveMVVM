@@ -68,14 +68,6 @@ struct MoneyAmountTextField: View {
   }
 }
 
-extension MoneyAmountTextField {
-  struct Colors {
-    let title: Color
-    let textField: Color
-    let currency: Color
-  }
-}
-
 #Preview {
   @Previewable @State var amount: Int = 0
   MoneyAmountTextField(

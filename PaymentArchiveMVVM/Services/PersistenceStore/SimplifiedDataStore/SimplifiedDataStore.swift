@@ -53,7 +53,7 @@ extension SimplifiedDataStore: PersistenceStore {
   
   func deletePayments(paymentIds: [String]) async throws {
     var updatedPaymnets: [String: [String: Payment]] = [:]
-    for var (accountId, accountPayments) in payments {
+    for (accountId, var accountPayments) in payments {
       for paymentId in paymentIds {
         accountPayments.removeValue(forKey: paymentId)
       }

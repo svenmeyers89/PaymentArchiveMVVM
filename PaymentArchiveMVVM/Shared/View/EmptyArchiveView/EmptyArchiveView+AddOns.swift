@@ -1,11 +1,20 @@
 //
-//  EmptyView+Configuration.swift
+//  EmptyArchiveView+AddOns.swift
 //  PaymentArchiveMVVM
 //
 //  Created by Sven Majeric on 10.08.2025..
 //
 
+import SwiftUI
+
 extension EmptyArchiveView {
+  struct Colors {
+    let icon: Color
+    let title: Color
+    let description: Color
+    let button: Color
+  }
+
   struct ButtonConfiguration: Sendable, Identifiable {
     let title: String
     let action: @MainActor () -> Void

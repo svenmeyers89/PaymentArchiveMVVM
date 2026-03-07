@@ -8,28 +8,10 @@
 import SwiftUI
 
 struct PaymentArchiveView: View {
-  enum ContentType {
-    case loading
-    case onboarding
-    case listView(
-      sections: [PaymentGroup],
-      currency: Currency,
-      selectedAccountId: String
-    )
-    case error(String)
-  }
-
-  private enum Modal {
-    case updateAccount(EditAccountUseCase)
-    case updatePayment(EditPaymentUseCase)
-    case changeTheme
-    case filterPaymentCategories
-  }
-
   @State
   private var viewModel: PaymentArchiveViewModel
   
-  @Environment(\.sceneFactory) private var sceneFactory
+  @Environment(\.screenFactory) private var screenFactory
   @Environment(\.theme) private var theme
 
   @State
@@ -135,11 +117,11 @@ struct PaymentArchiveView: View {
       ) {
         switch presentedModal {
         case .updateAccount(let useCase):
-          sceneFactory?
-            .buildEditAccountScene(useCase: useCase)
+          screenFactory?
+            .buildEditAccountScreen(useCase: useCase)
         case .updatePayment(let useCase):
-          sceneFactory?
-            .buildEditPaymentScene(useCase: useCase)
+          screenFactory?
+            .buildEditPaymentScreen(useCase: useCase)
         case .changeTheme:
           ChangeThemeView()
         case .filterPaymentCategories:
@@ -229,9 +211,9 @@ extension PaymentArchiveView {
   @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
   let dependencyManager = DependencyManager.mockedWithPopulatedStore
   return dependencyManager
-    .sceneFactory
-    .buildPaymentArchiveScene()
-    .environment(\.sceneFactory, dependencyManager.sceneFactory)
+    .screenFactory
+    .buildPaymentArchiveScreen()
+    .environment(\.screenFactory, dependencyManager.screenFactory)
     .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
     .environment(\.setTheme) { newTheme in
       selectedThemeID = newTheme.rawValue

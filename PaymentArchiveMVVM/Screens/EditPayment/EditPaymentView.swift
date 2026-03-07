@@ -74,7 +74,7 @@ struct EditPaymentView: View {
 }
 
 extension EditPaymentView {
-  var moneyAmountTextFieldColors: MoneyAmountTextField.Colors {
+  fileprivate var moneyAmountTextFieldColors: MoneyAmountTextField.Colors {
     .init(
       title: theme.text.primary,
       textField: theme.text.secondary,
@@ -82,7 +82,7 @@ extension EditPaymentView {
     )
   }
   
-  var categorySelectorColors: CategorySelector.Colors {
+  fileprivate var categorySelectorColors: CategorySelector.Colors {
     .init(
       categoryIcon: .init(
         iconBackground: theme.highlight.icon,
@@ -94,7 +94,7 @@ extension EditPaymentView {
     )
   }
   
-  var toastBarColors: ToastBar.Colors {
+  fileprivate var toastBarColors: ToastBar.Colors {
     .init(
       background: theme.toastBar.background,
       icon: theme.toastBar.icon,
