@@ -55,6 +55,8 @@ This document is the human- and agent-friendly source of truth for project conve
 - Keep unidirectional data flow: `AppState -> ViewModel -> View`.
 - Inject configuration and dependencies through initializers when possible.
 - Provide UI-specific actions through environment values only when shared across multiple views.
+- Views may read domain model values directly for presentation (display, selection, simple formatting inputs).
+- Any non​-trivial mapping, business logic, validation, persistence​/network interaction, or cross​-model orchestration must stay outside the ​View (​View​Model​/handler​/service).
 
 ### 4.2 Screens
 - A Screen is a feature-level SwiftUI entry point under `PaymentArchiveMVVM/Screens`.
@@ -103,25 +105,20 @@ This document is the human- and agent-friendly source of truth for project conve
 - Avoid leaking storage-specific types into domain/UI layers.
 - Use stable identifiers and deterministic ordering where needed.
 
-## 7. Testing strategy (TBD)
-### 7.1 Unit tests
-- Focus on view model behavior, selectors, grouping, and persistence mapping.
+## 7. Testing strategy
+### 7.1 Providing testability
+- Separate responsibilities and break business logic into small classes.
+- Inject dependencies through initializers or function parameters to facilitate use of mocked data.
+
+### 7.2 Unit tests
 - Prefer deterministic fixtures and explicit assertions.
-
-### 7.2 UI tests
-- Cover core user journeys and critical regressions.
-- Keep tests resilient to minor visual/layout changes.
-
-### 7.3 Test naming
 - Use clear behavior-based names (Given/When/Then style optional).
 
-## 8. How to add a new feature (TBD)
-1. Create a screen folder under `Screens/`.
-2. Add `View` and `ViewModel` files with clear ownership boundaries.
-3. Add `<ViewName>+AddOns.swift` for screen-local models and `DataManager` protocols.
-4. Reuse shared components before introducing new shared UI.
-5. Add/update service abstractions if new business operations are required.
-6. Add unit tests for logic and UI tests for critical flows.
+## 8. How to add a new feature
+1. Create a screen folder under `Screens/` following the UI convention in section 4.
+2. Reuse shared components before introducing new shared UI.
+3. Add/update service abstractions if new business operations are required.
+4. Add unit tests for logic.
 
 ## 9. Tooling and quality gates (TBD)
 - Formatting:
@@ -129,9 +126,9 @@ This document is the human- and agent-friendly source of truth for project conve
 - CI checks:
 - Build/test commands:
 
-## 10. Documentation map (TBD)
+## 10. Documentation map
 - Root agent contract: [AGENTS.md](../AGENTS.md)
-- Public project intro: `README.md`
+- Public project intro: [​README​.md](../​README​.md)
 - Deep conventions: this file
 
 ## 11. Open decisions / TODO
