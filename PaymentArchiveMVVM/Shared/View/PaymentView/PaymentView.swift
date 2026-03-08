@@ -44,16 +44,6 @@ struct PaymentView: View {
   }
 }
 
-extension PaymentView {
-  struct Colors {
-    let background: Color
-    let categoryIcon: CategoryIcon.Colors
-    let paymentDateTime: Color
-    let categoryName: Color
-    let paymentAmount: Color
-  }
-}
-
 #Preview {
   List {
     PaymentView(
@@ -62,7 +52,6 @@ extension PaymentView {
       ),
       currency: Currency.gbp,
       colors: .init(
-        background: .white,
         categoryIcon: .init(iconBackground: .white, iconTint: .blue),
         paymentDateTime: .secondary,
         categoryName: .primary,

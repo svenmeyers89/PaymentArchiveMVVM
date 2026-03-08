@@ -8,11 +8,6 @@
 import SwiftUI
 
 struct CategoryIcon: View {
-  struct Colors: Sendable {
-    let iconBackground: Color
-    let iconTint: Color
-  }
-  
   let iconSystemName: String
   let side: CGFloat
   let colors: Colors
@@ -20,10 +15,10 @@ struct CategoryIcon: View {
   var body: some View {
     Image(systemName: iconSystemName)
       .resizable() // makes the image respect frame
-      .scaledToFit() // prevents distortion
-      .frame(width: side, height: side) // fixed icon size
+      .scaledToFit()
+      .frame(width: side, height: side)
       .foregroundColor(colors.iconTint)
-      .padding(8) // internal padding
+      .padding(8) // internal image padding
       .background(colors.iconBackground)
       .clipShape(Circle())
   }

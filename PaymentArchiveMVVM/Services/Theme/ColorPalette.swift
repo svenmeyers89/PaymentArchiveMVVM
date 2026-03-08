@@ -8,12 +8,6 @@
 import SwiftUI
 
 struct ColorPalette: Sendable, Equatable {
-  struct Background: Sendable, Equatable {
-    let primary: Color
-    let header: Color
-    let box: Color
-  }
-
   struct Text: Sendable, Equatable {
     let primary: Color
     let secondary: Color
@@ -22,7 +16,7 @@ struct ColorPalette: Sendable, Equatable {
   }
   
   struct Highlight: Sendable, Equatable {
-    let tint: Color
+    let background: Color
     let icon: Color
     let title: Color
   }
@@ -31,6 +25,7 @@ struct ColorPalette: Sendable, Equatable {
     let title: Color
     let background: Color
     let border: Color
+    let icon: Color
   }
   
   struct ActivityIndicator: Sendable, Equatable {
@@ -40,11 +35,17 @@ struct ColorPalette: Sendable, Equatable {
   struct Toggle: Sendable, Equatable {
     let tint: Color
   }
+  
+  struct ToastBar: Sendable, Equatable {
+    let background: Color
+    let icon: Color
+    let text: Color
+  }
 
-  let background: Background
   let text: Text
   let highlight: Highlight
   let selector: Selector
   let activityIndicator: ActivityIndicator
   let toggle: Toggle
+  let toastBar: ToastBar
 }

@@ -23,13 +23,12 @@ struct CircleButton: View {
           isBouncing.toggle()
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isBouncing.toggle()
-            action() // Trigger the provided action
+            action()
           }
         }
       }) {
         ZStack {
-          Circle()
-            .fill(colors.background)
+          buttonBackground
             .frame(width: size, height: size)
             .shadow(radius: 10)
           Image(systemName: iconName)
@@ -43,10 +42,10 @@ struct CircleButton: View {
       .simultaneousGesture(
         DragGesture(minimumDistance: 0)
           .onChanged { _ in
-            isPressed = true // Shrink on press
+            isPressed = true
           }
           .onEnded { _ in
-            isPressed = false // Reset after press
+            isPressed = false
           }
       )
       .disabled(isBouncing)
@@ -54,9 +53,15 @@ struct CircleButton: View {
 }
 
 extension CircleButton {
-  struct Colors {
-    let background: Color
-    let icon: Color
+  @ViewBuilder
+  private var buttonBackground: some View {
+    let baseCircle = Circle().fill(colors.background)
+    
+    if #available(iOS 26.0, *) {
+      baseCircle.glassEffect()
+    } else {
+      baseCircle
+    }
   }
 }
 

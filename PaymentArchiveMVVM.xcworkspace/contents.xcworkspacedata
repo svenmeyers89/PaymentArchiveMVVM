@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Workspace version="1.0">
-  <FileRef location="group:PaymentArchiveMVVM.xcodeproj"></FileRef>
-  <FileRef location="group:Packages/AsyncOperators"></FileRef>
-  <FileRef location="group:Playgrounds/AsyncPlayground.playground"></FileRef>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:PaymentArchiveMVVM.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Packages/AsyncOperators">
+   </FileRef>
+   <FileRef
+      location = "group:Playgrounds/AsyncPlayground.playground">
+   </FileRef>
+   <Group
+      location = "group:Docs"
+      name = "Docs">
+      <FileRef
+         location = "group:ProjectGuide.md">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:AGENTS.md">
+   </FileRef>
 </Workspace>

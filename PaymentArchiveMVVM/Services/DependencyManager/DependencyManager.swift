@@ -18,7 +18,7 @@ actor DependencyManager {
   }()
   
   @MainActor
-  lazy var sceneFactory: SceneFactory = {
+  lazy var screenFactory: ScreenFactory = {
     .init(paymentArchive: paymentArchive)
   }()
 }

@@ -9,11 +9,6 @@ import SwiftUI
 
 extension ColorPalette {
   static let system: ColorPalette = ColorPalette(
-    background: .init(
-      primary: Color(.systemBackground),
-      header: Color(.systemGroupedBackground),
-      box: Color(.secondarySystemGroupedBackground)
-    ),
     text: .init(
       primary: .primary,
       secondary: .secondary,
@@ -21,20 +16,26 @@ extension ColorPalette {
       caption: Color(.tertiaryLabel)
     ),
     highlight: .init(
-      tint: .blue,
+      background: .blue,
       icon: .white,
       title: .white
     ),
     selector: .init(
       title: .blue,
       background: Color(.blue).opacity(0.1),
-      border: .blue
+      border: .blue,
+      icon: .blue
     ),
     activityIndicator: .init(
       tint: .gray
     ),
     toggle: .init(
       tint: .blue
+    ),
+    toastBar: .init(
+      background: .gray,
+      icon: .white,
+      text: .white
     )
   )
 }
