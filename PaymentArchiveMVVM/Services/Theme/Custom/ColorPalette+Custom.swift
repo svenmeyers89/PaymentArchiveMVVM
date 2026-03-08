@@ -23,7 +23,8 @@ extension ColorPalette {
     selector: .init(
       title: Color("SelectorTitle"),
       background: Color("SelectorBackground"),
-      border: Color("SelectorBorder")
+      border: Color("SelectorBorder"),
+      icon: Color("SelectorIcon")
     ),
     activityIndicator: .init(
       tint: Color("ActivityIndicatorTint")

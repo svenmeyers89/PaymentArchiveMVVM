@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ChangeThemeView: View {
+  let colors: Colors
+
   @Environment(\.theme) private var selectedTheme
   @Environment(\.setTheme) private var setTheme
 
@@ -20,15 +22,15 @@ struct ChangeThemeView: View {
         label: {
           HStack {
             Text(theme.name)
-              .foregroundStyle(themeTitleColor)
+              .foregroundStyle(colors.themeTitle)
             Spacer()
             if selectedTheme == theme {
               Image(systemName: "checkmark.circle")
-                .foregroundStyle(checkmarkIconColor)
+                .foregroundStyle(colors.checkmarkIcon)
             }
           }
           .padding(12)
-          .background(themeBoxColor)
+          .background(colors.themeBox)
           .cornerRadius(12)
         }
       )
@@ -44,25 +46,17 @@ extension Theme {
   }
 }
 
-extension ChangeThemeView {
-  var themeTitleColor: Color {
-    selectedTheme.colorPalette.text.primary
-  }
-  
-  var checkmarkIconColor: Color {
-    selectedTheme.colorPalette.highlight.background
-  }
-  
-  var themeBoxColor: Color {
-    selectedTheme.colorPalette.selector.background
-  }
-}
-
 #Preview {
   @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
-  ChangeThemeView()
-    .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
-    .environment(\.setTheme) { newTheme in
-      selectedThemeID = newTheme.rawValue
-    }
+  ChangeThemeView(
+    colors: .init(
+      themeTitle: .primary,
+      checkmarkIcon: .blue,
+      themeBox: .gray.opacity(0.2)
+    )
+  )
+  .environment(\.theme, Theme(rawValue: selectedThemeID) ?? Theme.defaultValue)
+  .environment(\.setTheme) { newTheme in
+    selectedThemeID = newTheme.rawValue
+  }
 }

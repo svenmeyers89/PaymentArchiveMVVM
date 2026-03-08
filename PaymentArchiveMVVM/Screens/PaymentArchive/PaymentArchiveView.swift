@@ -123,7 +123,7 @@ struct PaymentArchiveView: View {
           screenFactory?
             .buildEditPaymentScreen(useCase: useCase)
         case .changeTheme:
-          ChangeThemeView()
+          ChangeThemeView(colors: changeThemeViewColors)
         case .filterPaymentCategories:
           NavigationStack {
             CategoryListView(
@@ -203,6 +203,14 @@ extension PaymentArchiveView {
         title: theme.text.primary,
         toggle: theme.toggle.tint
       )
+    )
+  }
+
+  var changeThemeViewColors: ChangeThemeView.Colors {
+    .init(
+      themeTitle: theme.selector.title,
+      checkmarkIcon: theme.selector.icon,
+      themeBox: theme.selector.background
     )
   }
 }

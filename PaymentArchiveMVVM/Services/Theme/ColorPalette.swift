@@ -25,6 +25,7 @@ struct ColorPalette: Sendable, Equatable {
     let title: Color
     let background: Color
     let border: Color
+    let icon: Color
   }
   
   struct ActivityIndicator: Sendable, Equatable {

@@ -23,7 +23,8 @@ extension ColorPalette {
     selector: .init(
       title: .blue,
       background: Color(.blue).opacity(0.1),
-      border: .blue
+      border: .blue,
+      icon: .blue
     ),
     activityIndicator: .init(
       tint: .gray
