@@ -21,55 +21,61 @@ struct EditPaymentView: View {
   }
 
   var body: some View {
-    VStack {
-      Spacer()
-      
-      MoneyAmountTextField(
-        amountMinorUnits: $viewModel.amountMinorUnits,
-        currency: viewModel.currency,
-        colors: moneyAmountTextFieldColors
+    NavigationStack {
+      VStack {
+        Spacer()
+        
+        MoneyAmountTextField(
+          amountMinorUnits: $viewModel.amountMinorUnits,
+          currency: viewModel.currency,
+          colors: moneyAmountTextFieldColors
+        )
+        .padding(.bottom, 16)
+        
+        CategorySelector(
+          selectedCategory: $viewModel.category,
+          categories: viewModel.categories,
+          colors: categorySelectorColors
+        )
+        .padding(.bottom, 16)
+        .fixedSize(horizontal: false, vertical: true)
+        
+        Spacer()
+      }
+      .padding(.horizontal, 24)
+      .toastBar(
+        toastBarMessage: $toastMessage,
+        duration: 3,
+        colors: toastBarColors
       )
-      .padding(.bottom, 16)
-      
-      CategorySelector(
-        selectedCategory: $viewModel.category,
-        categories: viewModel.categories,
-        colors: categorySelectorColors
-      )
-      .padding(.bottom, 16)
-      .fixedSize(horizontal: false, vertical: true)
-      
-      Button("Save") {
-        Task {
-          isActionInProgress = true
-          
-          let result = await viewModel.savePayment()
-          
-          isActionInProgress = false
-
-          switch result {
-          case .success:
+      .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Button("Cancel") {
             dismiss()
-          case .failure(let error):
-            toastMessage = error.toastBarMessage
           }
         }
+        
+        ToolbarItem(placement: .topBarTrailing) {
+          Button("Save") {
+            Task {
+              isActionInProgress = true
+              
+              let result = await viewModel.savePayment()
+              
+              isActionInProgress = false
+
+              switch result {
+              case .success:
+                dismiss()
+              case .failure(let error):
+                toastMessage = error.toastBarMessage
+              }
+            }
+          }
+          .disabled(isActionInProgress)
+        }
       }
-      .padding(.bottom, 32)
-      .disabled(isActionInProgress)
-      
-      Button("Cancel") {
-        dismiss()
-      }
-      
-      Spacer()
     }
-    .padding(.horizontal, 24)
-    .toastBar(
-      toastBarMessage: $toastMessage,
-      duration: 3,
-      colors: toastBarColors
-    )
   }
 }
 
