@@ -34,17 +34,23 @@ final class PaymentArchiveViewModel {
     paymentArchiveCategorySelector.currentlySelectedPaymentCategories
   }
   
+  var isInDemoMode: Bool {
+    paymentArchive.isInDemoMode
+  }
+  
   private var errorMessage: String?
 
   private let stateWrapper: PaymentArchiveStateWrapper
   private let paymentArchive: PaymentArchive
   private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
+  
+  private let defaultPaymentCategorySelection: [Payment.Category] = Payment.Category.allCases
 
   init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
     self.paymentArchiveCategorySelector = .init(
-      allPaymentCategories: Payment.Category.allCases,
-      selectedPaymentCategories: Set<Payment.Category>(Payment.Category.allCases)
+      allPaymentCategories: defaultPaymentCategorySelection,
+      selectedPaymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
     )
     self.stateWrapper = .init(
       paymentArchiveStateStream: paymentArchive.makeStateStream(),
@@ -63,6 +69,30 @@ final class PaymentArchiveViewModel {
   }
   
   func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
-    paymentArchiveCategorySelector.didConfirmSelection(paymentCategories: paymentCategories)
+    paymentArchiveCategorySelector.select(paymentCategories: paymentCategories)
+  }
+
+  func enterDemoMode() async {
+    do {
+      try await paymentArchive.enterDemoMode()
+      paymentArchiveCategorySelector.select(
+        paymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
+      )
+      errorMessage = nil
+    } catch {
+      errorMessage = error.localizedDescription
+    }
+  }
+
+  func exitDemoMode() async {
+    do {
+      try await paymentArchive.exitDemoMode()
+      paymentArchiveCategorySelector.select(
+        paymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
+      )
+      errorMessage = nil
+    } catch {
+      errorMessage = error.localizedDescription
+    }
   }
 }

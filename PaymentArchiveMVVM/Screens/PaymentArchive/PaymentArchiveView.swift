@@ -48,7 +48,11 @@ struct PaymentArchiveView: View {
               createAccountAction: {
                 presentedModal = .updateAccount(.addNewAccount)
               },
-              showDemoAction: { print("Show Demo!") }
+              showDemoAction: {
+                Task {
+                  await viewModel.enterDemoMode()
+                }
+              }
             )
           )
         case let .listView(
@@ -94,6 +98,20 @@ struct PaymentArchiveView: View {
             }
             .padding(.trailing, 20)
             .padding(.bottom, 20)
+          }
+          .overlay(alignment: .bottomLeading) {
+            if viewModel.isInDemoMode {
+              ExitDemoButton(
+                title: "Exit Demo",
+                colors: exitDemoButtonColors
+              ) {
+                Task {
+                  await viewModel.exitDemoMode()
+                }
+              }
+              .padding(.leading, 20)
+              .padding(.bottom, 20)
+            }
           }
         }
       }
@@ -213,6 +231,13 @@ extension PaymentArchiveView {
       themeBox: theme.selector.background
     )
   }
+
+  var exitDemoButtonColors: ExitDemoButton.Colors {
+    .init(
+      background: .gray.opacity(0.2),
+      text: .primary
+    )
+  }
 }
 
 #Preview {
@@ -227,3 +252,4 @@ extension PaymentArchiveView {
       selectedThemeID = newTheme.rawValue
     }
 }
+

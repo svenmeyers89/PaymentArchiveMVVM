@@ -17,31 +17,57 @@ final class PaymentArchive: Sendable {
     fileprivate(set) var payments: [String: [Payment]]
   }
 
+  private enum Mode {
+    case live
+    case demo
+  }
+
   private let broadcaster: MainBroadcaster<State?> = .init(value: nil)
   
   var currentState: State? {
     broadcaster.value
   }
   
+  var isInDemoMode: Bool {
+    mode == .demo
+  }
+
   // Generate a stream for each new consumer
   func makeStateStream() -> AsyncStream<State?> {
     broadcaster.makeStream()
   }
 
-  private let persistanceStore: PersistenceStore
+  private let livePersistenceStore: PersistenceStore
+  private var demoPersistenceStore: PersistenceStore?
+  private var mode: Mode = .live
+  private var cachedState: [Mode: PaymentArchive.State] = [:]
+
+  private var activeStore: PersistenceStore {
+    switch mode {
+    case .live:
+      return livePersistenceStore
+    case .demo:
+      if let demoPersistenceStore {
+        return demoPersistenceStore
+      }
+      let demoStore = SimplifiedDataStore.demo()
+      demoPersistenceStore = demoStore
+      return demoStore
+    }
+  }
   
   init(persistanceStore: PersistenceStore) {
-    self.persistanceStore = persistanceStore
+    self.livePersistenceStore = persistanceStore
   }
   
   func loadInitialState() async throws {
-    let accounts = try await persistanceStore.loadAllAccounts()
+    let accounts = try await activeStore.loadAllAccounts()
 
     let selectedAccount: Account? = accounts.first
 
     let accountPayments: [Payment]
     if let selectedAccount {
-      accountPayments = try await persistanceStore.loadPayments(accountId: selectedAccount.id)
+      accountPayments = try await activeStore.loadPayments(accountId: selectedAccount.id)
     } else {
       accountPayments = []
     }
@@ -60,13 +86,30 @@ final class PaymentArchive: Sendable {
     )
     broadcaster.value = state
   }
+
+  func enterDemoMode() async throws {
+    mode = .demo
+    cachedState[.live] = broadcaster.value
+    broadcaster.value = nil
+    try await loadInitialState()
+  }
+
+  func exitDemoMode() async throws {
+    mode = .live
+    if let cachedLiveState = cachedState[.live] {
+      broadcaster.value = cachedLiveState
+    } else {
+      broadcaster.value = nil
+      try await loadInitialState()
+    }
+  }
 }
 
 extension PaymentArchive: EditPaymentDataManager {
   func save(payment: Payment) async throws {
-    try await persistanceStore.savePayment(payment)
+    try await activeStore.savePayment(payment)
 
-    let payments = try await persistanceStore.loadPayments(accountId: payment.accountId)
+    let payments = try await activeStore.loadPayments(accountId: payment.accountId)
 
     var updatedState: State? = currentState
     updatedState?.payments[payment.accountId] = payments
@@ -76,7 +119,7 @@ extension PaymentArchive: EditPaymentDataManager {
 
 extension PaymentArchive: EditAccountDataManager {
   func save(account: Account) async throws {
-    try await persistanceStore.saveAccount(account)
+    try await activeStore.saveAccount(account)
 
     var updatedState = currentState
     updatedState?.accounts[account.id] = account
