@@ -7,14 +7,22 @@
 
 actor DependencyManager {
   private let persistenceStore: PersistenceStore
+  private let demoDataStoreConfiguration: DemoDataStoreConfiguration
 
-  init(persistenceStore: PersistenceStore) {
+  init(
+    persistenceStore: PersistenceStore,
+    demoDataStoreConfiguration: DemoDataStoreConfiguration
+  ) {
     self.persistenceStore = persistenceStore
+    self.demoDataStoreConfiguration = demoDataStoreConfiguration
   }
   
   @MainActor
   private lazy var paymentArchive: PaymentArchive = {
-    .init(persistanceStore: self.persistenceStore)
+    .init(
+      persistanceStore: self.persistenceStore,
+      demoDataStoreConfiguration: self.demoDataStoreConfiguration
+    )
   }()
   
   @MainActor

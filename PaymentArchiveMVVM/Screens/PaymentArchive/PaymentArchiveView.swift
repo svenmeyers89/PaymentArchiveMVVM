@@ -58,7 +58,8 @@ struct PaymentArchiveView: View {
         case let .listView(
           paymentGroups,
           currency,
-          selectedAccountId
+          selectedAccountId,
+          isDemoMode
         ):
           List(paymentGroups, id: \.id) { paymentGroup in
             switch paymentGroup.kind {
@@ -100,7 +101,7 @@ struct PaymentArchiveView: View {
             .padding(.bottom, 20)
           }
           .overlay(alignment: .bottomLeading) {
-            if viewModel.isInDemoMode {
+            if isDemoMode {
               ExitDemoButton(
                 title: "Exit Demo",
                 colors: exitDemoButtonColors
@@ -242,7 +243,8 @@ extension PaymentArchiveView {
 
 #Preview {
   @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
-  let dependencyManager = DependencyManager.mockedWithPopulatedStore
+  //let dependencyManager = DependencyManager.mockedWithPopulatedStore
+  let dependencyManager = DependencyManager.mockedWithEmptyStore
   return dependencyManager
     .screenFactory
     .buildPaymentArchiveScreen()

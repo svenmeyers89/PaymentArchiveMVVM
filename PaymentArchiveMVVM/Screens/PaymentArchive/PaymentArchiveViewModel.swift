@@ -21,8 +21,8 @@ final class PaymentArchiveViewModel {
       return .loading
     case .shouldOnboard:
       return .onboarding
-    case let .shouldLoadList(paymentGroups, currency, selectedAccountId):
-      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId)
+    case let .shouldLoadList(paymentGroups, currency, selectedAccountId, isDemoMode):
+      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId, isDemoMode: isDemoMode)
     }
   }
   
@@ -32,10 +32,6 @@ final class PaymentArchiveViewModel {
   
   var selectedPaymentCategories: Set<Payment.Category> {
     paymentArchiveCategorySelector.currentlySelectedPaymentCategories
-  }
-  
-  var isInDemoMode: Bool {
-    paymentArchive.isInDemoMode
   }
   
   private var errorMessage: String?
@@ -61,7 +57,7 @@ final class PaymentArchiveViewModel {
 
   func loadContent() async {
     do {
-      try await paymentArchive.loadInitialState()
+      try await paymentArchive.loadData()
       errorMessage = nil
     } catch {
       errorMessage = error.localizedDescription

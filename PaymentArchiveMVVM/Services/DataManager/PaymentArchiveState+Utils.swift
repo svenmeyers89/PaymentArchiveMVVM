@@ -6,7 +6,7 @@
 //
 
 extension PaymentArchive.State {
-  static let empty = PaymentArchive.State(selectedAccountId: nil, accounts: [:], payments: [:])
+  static let empty = PaymentArchive.State(selectedAccountId: nil, accounts: [:], payments: [:], isDemoMode: false)
   
   var selectedAccount: Account? {
     guard let selectedAccountId else { return nil }
