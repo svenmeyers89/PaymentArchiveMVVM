@@ -235,8 +235,8 @@ extension PaymentArchiveView {
 
   var exitDemoButtonColors: ExitDemoButton.Colors {
     .init(
-      background: .gray.opacity(0.2),
-      text: .primary
+      background: theme.highlight.background,
+      text: theme.highlight.title
     )
   }
 }
