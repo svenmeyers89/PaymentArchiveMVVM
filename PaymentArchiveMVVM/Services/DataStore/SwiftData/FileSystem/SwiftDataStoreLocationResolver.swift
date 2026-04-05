@@ -39,7 +39,7 @@ struct ApplicationSandboxSwiftDataStoreLocationResolver {
           for: .applicationSupportDirectory,
           in: .userDomainMask
         ).first else {
-          throw SwiftDataPersistenceStoreError.missingApplicationSupportDirectory
+          throw SwiftDataStoreError.missingApplicationSupportDirectory
         }
         return applicationSupportURL
       case .temporary:

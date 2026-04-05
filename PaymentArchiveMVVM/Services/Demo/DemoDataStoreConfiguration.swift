@@ -6,6 +6,6 @@
 //
 
 struct DemoDataStoreConfiguration: Sendable {
-  let dataStore: PersistenceStore
+  let dataStore: DataStore
   let dataStoreSeeder: DemoDataStoreSeeder
 }

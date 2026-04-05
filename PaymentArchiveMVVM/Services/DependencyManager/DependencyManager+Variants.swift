@@ -9,13 +9,13 @@ extension DependencyManager {
   static let live: DependencyManager = {
     do {
       let locationResolver: SwiftDataStoreLocationResolver = ApplicationSandboxSwiftDataStoreLocationResolver()
-      let persistenceStore: PersistenceStore = try SwiftDataPersistenceStore(
+      let persistenceStore: DataStore = try SwiftDataStore(
         dataBaseConfiguration: .persisted(
           locationResolver: locationResolver
         )
       )
 
-      let demoDataStore: PersistenceStore = try SwiftDataPersistenceStore(dataBaseConfiguration: .inMemory)
+      let demoDataStore: DataStore = try SwiftDataStore(dataBaseConfiguration: .inMemory)
       let demoDataStoreSeeder: DemoDataStoreSeeder = RandomizedDataStoreSeeder()
       let demoDataStoreConfiguration: DemoDataStoreConfiguration = .init(
         dataStore: demoDataStore,

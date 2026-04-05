@@ -6,11 +6,11 @@
 //
 
 actor DependencyManager {
-  private let persistenceStore: PersistenceStore
+  private let persistenceStore: DataStore
   private let demoDataStoreConfiguration: DemoDataStoreConfiguration
 
   init(
-    persistenceStore: PersistenceStore,
+    persistenceStore: DataStore,
     demoDataStoreConfiguration: DemoDataStoreConfiguration
   ) {
     self.persistenceStore = persistenceStore

@@ -25,7 +25,7 @@ actor SimplifiedDataStore {
   }
 }
 
-extension SimplifiedDataStore: PersistenceStore {
+extension SimplifiedDataStore: DataStore {
   func loadAllAccounts() async throws -> [Account] {
     accounts.values
       .sorted(by: { $0.selectedAt > $1.selectedAt })

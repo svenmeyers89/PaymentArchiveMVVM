@@ -29,10 +29,10 @@ final class PaymentArchive: Sendable {
     broadcaster.makeStream()
   }
 
-  private let persistenceStore: PersistenceStore
+  private let persistenceStore: DataStore
   private let demoDataStoreConfiguration: DemoDataStoreConfiguration
 
-  private var activeDataStore: PersistenceStore {
+  private var activeDataStore: DataStore {
     if currentState?.isDemoMode == true {
       return demoDataStoreConfiguration.dataStore
     } else {
@@ -41,7 +41,7 @@ final class PaymentArchive: Sendable {
   }
   
   init(
-    persistanceStore: PersistenceStore,
+    persistanceStore: DataStore,
     demoDataStoreConfiguration: DemoDataStoreConfiguration
   ) {
     self.persistenceStore = persistanceStore
@@ -53,7 +53,7 @@ final class PaymentArchive: Sendable {
   }
   
   private func loadInitialState(isDemoMode: Bool) async throws {
-     let dataStore: PersistenceStore = {
+     let dataStore: DataStore = {
       if isDemoMode {
         demoDataStoreConfiguration.dataStore
       } else {

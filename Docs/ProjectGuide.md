@@ -19,7 +19,7 @@ This document is the human- and agent-friendly source of truth for project conve
 - `Screens`: UI composition, user interaction, feature state wiring.
 - `ViewModel`: state transitions, orchestration, async tasks.
 - `Services`: application and business services plus dependency boundaries.
-- `PersistenceStore`: data storage abstractions and implementations.
+- `DataStore`: data storage abstractions and implementations.
 - `DataModel`: domain entities and domain-focused extensions.
 - `PaymentArchive`: central data manager and source of unidirectional AppState data flow.
 
@@ -90,7 +90,7 @@ This document is the human- and agent-friendly source of truth for project conve
 - Avoid leaking storage-specific types into domain/UI layers.
 - Keep DTO/record mapping explicit and localized.
 - Use stable identifiers and deterministic ordering where needed.
-- Keep the Persistence API clear by documenting all data conventions (such as sort order of returned models).
+- Keep the data store API clear by documenting all data conventions (such as sort order of returned models).
 
 ## 7. Testing strategy
 ### 7.1 Providing testability

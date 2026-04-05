@@ -1,5 +1,5 @@
 //
-//  SwiftDataPersistenceStore.swift
+//  SwiftDataStore.swift
 //  PaymentArchiveMVVM
 //
 //  Created by Sven Majeric on 03.01.2026..
@@ -8,13 +8,13 @@
 import Foundation
 import SwiftData
 
-enum SwiftDataPersistenceStoreError: Error, Equatable {
+enum SwiftDataStoreError: Error, Equatable {
   case missingDomainParameters
   case invalidDataStoreState
   case missingApplicationSupportDirectory
 }
 
-actor SwiftDataPersistenceStore {
+actor SwiftDataStore {
   enum DataBaseConfiguration {
     case inMemory
     case persisted(locationResolver: SwiftDataStoreLocationResolver)
@@ -51,7 +51,7 @@ actor SwiftDataPersistenceStore {
   }
 }
 
-extension SwiftDataPersistenceStore: PersistenceStore {
+extension SwiftDataStore: DataStore {
   func loadAllAccounts() async throws -> [Account] {
     let accountRecords = try loadAllAccountRecords()
     return try accountRecords.map { try $0.toDomain() }
@@ -80,7 +80,7 @@ extension SwiftDataPersistenceStore: PersistenceStore {
       existingPaymentRecord.update(with: paymentDTO)
     } else {
       guard let accountRecord = try loadAccountRecord(accountId: payment.accountId) else {
-        throw SwiftDataPersistenceStoreError.invalidDataStoreState
+        throw SwiftDataStoreError.invalidDataStoreState
       }
       let paymentRecord = PaymentRecord(domain: paymentDTO)
       // Since these are inverse relationships, only one of two two following lines is enough
@@ -95,7 +95,7 @@ extension SwiftDataPersistenceStore: PersistenceStore {
   
   func deleteAccount(accountId: String) async throws {
     guard let accountRecord = try loadAccountRecord(accountId: accountId) else {
-      print("SwiftDataPersistenceStore: Account \(accountId) not found")
+      print("SwiftDataStore: Account \(accountId) not found")
       return
     }
     

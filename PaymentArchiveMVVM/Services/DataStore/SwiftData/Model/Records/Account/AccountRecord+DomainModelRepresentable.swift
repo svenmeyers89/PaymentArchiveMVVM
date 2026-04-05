@@ -28,7 +28,7 @@ extension AccountRecord: DomainModelRepresentable {
   
   func toDomain() throws -> Account {
     guard let currency = Currency.getPredefined(withCode: currencyCode) else {
-      throw SwiftDataPersistenceStoreError.missingDomainParameters
+      throw SwiftDataStoreError.missingDomainParameters
     }
     return .init(
       id: id,

@@ -8,7 +8,7 @@
 import Foundation
 
 actor RandomizedDataStoreSeeder: DemoDataStoreSeeder {
-  func seedDemoData(into store: PersistenceStore) async throws {
+  func seedDemoData(into store: DataStore) async throws {
     let accountId = UUID().uuidString
     let currency = Currency.eur
     let account = Account(

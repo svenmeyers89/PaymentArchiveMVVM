@@ -29,7 +29,7 @@ extension PaymentRecord: DomainModelRepresentable {
   func toDomain() throws -> Payment {
     guard let accountRecord = account,
           let category = Payment.Category(rawValue: self.category) else {
-      throw SwiftDataPersistenceStoreError.missingDomainParameters
+      throw SwiftDataStoreError.missingDomainParameters
     }
     return .init(
       id: id,
