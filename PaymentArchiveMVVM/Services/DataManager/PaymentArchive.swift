@@ -9,11 +9,6 @@ import AsyncOperators
 import Foundation
 import Observation
 
-struct DemoDataStoreConfiguration: Sendable {
-  let dataStore: PersistenceStore
-  let dataStoreSeeder: DemoDataStoreSeeder
-}
-
 @MainActor
 final class PaymentArchive: Sendable {
   struct State: Equatable, Sendable {

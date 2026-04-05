@@ -1,15 +1,11 @@
 //
-//  DemoPersistenceStoreBuilder.swift
+//  RandomizedDataStoreSeeder.swift
 //  PaymentArchiveMVVM
 //
-//  Created by Sven Majeric on 01.04.2026..
+//  Created by Sven Majeric on 05.04.2026..
 //
 
 import Foundation
-
-protocol DemoDataStoreSeeder: Sendable {
-  func seedDemoData(into store: PersistenceStore) async throws
-}
 
 actor RandomizedDataStoreSeeder: DemoDataStoreSeeder {
   func seedDemoData(into store: PersistenceStore) async throws {
