@@ -7,6 +7,7 @@
 
 import AsyncOperators
 import Foundation
+import Observation
 
 @MainActor
 final class PaymentArchive: Sendable {

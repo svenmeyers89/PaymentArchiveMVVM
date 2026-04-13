@@ -14,9 +14,6 @@
       location = "group:Docs"
       name = "Docs">
       <FileRef
-         location = "group:DataFlow.md">
-      </FileRef>
-      <FileRef
          location = "group:ProjectGuide.md">
       </FileRef>
    </Group>
