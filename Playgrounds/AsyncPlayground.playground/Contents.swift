@@ -4,6 +4,41 @@ import AsyncOperators
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
+@Observable class Person {
+  var firstName: String = ""
+}
+
+func runObservationsTest() {
+  let person = Person()
+  
+  person.firstName = "Perica"
+  print("I can access person's first name directly: \(person.firstName)")
+
+  // Create an async sequence to observe changes
+  let observations = Observations<String, Never>.untilFinished {
+    if person.firstName == "STOP" {
+      return .finish
+    }
+    return .next(person.firstName)
+  }
+
+  Task {
+    for await name in observations {
+      print("Name updated: \(name)")
+    }
+    print("Observation ended.")
+  }
+  
+  Task {
+    try? await Task.sleep(nanoseconds: 1_000_000_000)
+    person.firstName = "John"
+    try? await Task.sleep(nanoseconds: 1_000_000_000)
+    person.firstName = "Jane"
+    try? await Task.sleep(nanoseconds: 1_000_000_000)
+    person.firstName = "STOP"
+  }
+}
+
 // MARK: - CombineLatest
 
 func makeStream(label: String, values: [Int], delayNanoseconds: UInt64) -> AsyncStream<Int> {
@@ -166,15 +201,18 @@ func runBroadcasterTest() {
 // MARK: - Testing
 
 enum PlaygroundTest {
+  case observations
   case combineLatest
   case composition
   case broadcaster
   case singleStream
 }
 
-let activeTest: PlaygroundTest = .broadcaster
+let activeTest: PlaygroundTest = .observations
 
 switch activeTest {
+case .observations:
+  runObservationsTest()
 case .combineLatest:
   runCombineLatestTest()
 case .composition:
