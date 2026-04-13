@@ -5,9 +5,9 @@
 //  Created by Sven Majeric on 16.01.2026..
 //
 
-/// By conforming to this protocol, PersistenceStore models become handlers for two-way mapping
+/// By conforming to this protocol, data store models become handlers for two-way mapping
 ///
-/// Note: PersistenceStore model @Relationship properties require special handling at PersistenceStore level during creation.
+/// Note: data store model @Relationship properties require special handling at data store level during creation.
 /// As for other actions, the @Relationship attributes automatically keep the DB context consistent.
 protocol DomainModelRepresentable {
   associatedtype DomainModel

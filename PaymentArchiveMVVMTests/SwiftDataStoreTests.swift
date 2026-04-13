@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import PaymentArchiveMVVM
 
-struct SwiftDataPersistenceStoreTests {
+struct SwiftDataStoreTests {
   @Test("Loads accounts sorted by selectedAt descending")
   func loadAllAccountsSortedBySelectedAtDescending() async throws {
-    let store = try SwiftDataPersistenceStore(dataBaseConfiguration: .inMemory)
+    let store = try SwiftDataStore(dataBaseConfiguration: .inMemory)
     let olderAccount = Account(
       id: "account-1",
       selectedAt: Date(timeIntervalSince1970: 10),
@@ -30,7 +30,7 @@ struct SwiftDataPersistenceStoreTests {
 
   @Test("Loads payments sorted by createdAt descending and deletes selected payments")
   func loadPaymentsSortedByCreatedAtDescendingAndDeletePayments() async throws {
-    let store = try SwiftDataPersistenceStore(dataBaseConfiguration: .inMemory)
+    let store = try SwiftDataStore(dataBaseConfiguration: .inMemory)
     let account = Account(
       id: "account-1",
       selectedAt: Date(timeIntervalSince1970: 100),
@@ -68,7 +68,7 @@ struct SwiftDataPersistenceStoreTests {
 
   @Test("Saving payment without existing account throws invalidDataStoreState")
   func savePaymentWithoutAccountThrowsInvalidDataStoreState() async throws {
-    let store = try SwiftDataPersistenceStore(dataBaseConfiguration: .inMemory)
+    let store = try SwiftDataStore(dataBaseConfiguration: .inMemory)
     let payment = Payment(
       id: "payment-1",
       createdAt: Date(timeIntervalSince1970: 10),
@@ -80,7 +80,7 @@ struct SwiftDataPersistenceStoreTests {
     do {
       try await store.savePayment(payment)
       Issue.record("Expected savePayment to throw when account does not exist.")
-    } catch let error as SwiftDataPersistenceStoreError {
+    } catch let error as SwiftDataStoreError {
       #expect(error == .invalidDataStoreState)
     } catch {
       Issue.record("Unexpected error type: \(error)")
@@ -95,7 +95,7 @@ struct SwiftDataPersistenceStoreTests {
         fileManager: fileManager,
         cachingType: .temporary
       )
-    let store = try SwiftDataPersistenceStore(dataBaseConfiguration: .persisted(locationResolver: locationResolver))
+    let store = try SwiftDataStore(dataBaseConfiguration: .persisted(locationResolver: locationResolver))
     
     let storeURL = try locationResolver.storeURL()
     defer {

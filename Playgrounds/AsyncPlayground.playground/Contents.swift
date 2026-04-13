@@ -172,7 +172,7 @@ enum PlaygroundTest {
   case singleStream
 }
 
-let activeTest: PlaygroundTest = .composition
+let activeTest: PlaygroundTest = .broadcaster
 
 switch activeTest {
 case .combineLatest:

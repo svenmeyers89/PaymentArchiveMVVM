@@ -21,8 +21,8 @@ final class PaymentArchiveViewModel {
       return .loading
     case .shouldOnboard:
       return .onboarding
-    case let .shouldLoadList(paymentGroups, currency, selectedAccountId):
-      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId)
+    case let .shouldLoadList(paymentGroups, currency, selectedAccountId, isDemoMode):
+      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId, isDemoMode: isDemoMode)
     }
   }
   
@@ -39,12 +39,14 @@ final class PaymentArchiveViewModel {
   private let stateWrapper: PaymentArchiveStateWrapper
   private let paymentArchive: PaymentArchive
   private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
+  
+  private let defaultPaymentCategorySelection: [Payment.Category] = Payment.Category.allCases
 
   init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
     self.paymentArchiveCategorySelector = .init(
-      allPaymentCategories: Payment.Category.allCases,
-      selectedPaymentCategories: Set<Payment.Category>(Payment.Category.allCases)
+      allPaymentCategories: defaultPaymentCategorySelection,
+      selectedPaymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
     )
     self.stateWrapper = .init(
       paymentArchiveStateStream: paymentArchive.makeStateStream(),
@@ -55,7 +57,7 @@ final class PaymentArchiveViewModel {
 
   func loadContent() async {
     do {
-      try await paymentArchive.loadInitialState()
+      try await paymentArchive.loadData()
       errorMessage = nil
     } catch {
       errorMessage = error.localizedDescription
@@ -63,6 +65,30 @@ final class PaymentArchiveViewModel {
   }
   
   func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
-    paymentArchiveCategorySelector.didConfirmSelection(paymentCategories: paymentCategories)
+    paymentArchiveCategorySelector.select(paymentCategories: paymentCategories)
+  }
+
+  func enterDemoMode() async {
+    do {
+      try await paymentArchive.enterDemoMode()
+      paymentArchiveCategorySelector.select(
+        paymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
+      )
+      errorMessage = nil
+    } catch {
+      errorMessage = error.localizedDescription
+    }
+  }
+
+  func exitDemoMode() async {
+    do {
+      try await paymentArchive.exitDemoMode()
+      paymentArchiveCategorySelector.select(
+        paymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
+      )
+      errorMessage = nil
+    } catch {
+      errorMessage = error.localizedDescription
+    }
   }
 }

@@ -48,13 +48,18 @@ struct PaymentArchiveView: View {
               createAccountAction: {
                 presentedModal = .updateAccount(.addNewAccount)
               },
-              showDemoAction: { print("Show Demo!") }
+              showDemoAction: {
+                Task {
+                  await viewModel.enterDemoMode()
+                }
+              }
             )
           )
         case let .listView(
           paymentGroups,
           currency,
-          selectedAccountId
+          selectedAccountId,
+          isDemoMode
         ):
           List(paymentGroups, id: \.id) { paymentGroup in
             switch paymentGroup.kind {
@@ -94,6 +99,20 @@ struct PaymentArchiveView: View {
             }
             .padding(.trailing, 20)
             .padding(.bottom, 20)
+          }
+          .overlay(alignment: .bottomLeading) {
+            if isDemoMode {
+              ExitDemoButton(
+                title: "Exit Demo",
+                colors: exitDemoButtonColors
+              ) {
+                Task {
+                  await viewModel.exitDemoMode()
+                }
+              }
+              .padding(.leading, 20)
+              .padding(.bottom, 20)
+            }
           }
         }
       }
@@ -213,11 +232,19 @@ extension PaymentArchiveView {
       themeBox: theme.selector.background
     )
   }
+
+  var exitDemoButtonColors: ExitDemoButton.Colors {
+    .init(
+      background: theme.highlight.background,
+      text: theme.highlight.title
+    )
+  }
 }
 
 #Preview {
   @Previewable @State var selectedThemeID: String = Theme.defaultValue.rawValue
-  let dependencyManager = DependencyManager.mockedWithPopulatedStore
+  //let dependencyManager = DependencyManager.mockedWithPopulatedStore
+  let dependencyManager = DependencyManager.mockedWithEmptyStore
   return dependencyManager
     .screenFactory
     .buildPaymentArchiveScreen()
@@ -227,3 +254,4 @@ extension PaymentArchiveView {
       selectedThemeID = newTheme.rawValue
     }
 }
+

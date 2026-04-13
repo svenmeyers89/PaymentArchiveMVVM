@@ -13,7 +13,12 @@ final class PaymentArchiveStateWrapper {
   enum WrappedState: Sendable, Equatable {
     case missingInitialState
     case shouldOnboard
-    case shouldLoadList(paymentGroups: [PaymentGroup], currency: Currency, selectedAccountId: String)
+    case shouldLoadList(
+      paymentGroups: [PaymentGroup],
+      currency: Currency,
+      selectedAccountId: String,
+      isDemoMode: Bool
+    )
   }
 
   private(set) var wrappedState: WrappedState = .missingInitialState
@@ -83,6 +88,11 @@ final class PaymentArchiveStateWrapper {
     let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
     let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
     
-    self.wrappedState = .shouldLoadList(paymentGroups: paymentGroups, currency: selectedAccount.currency, selectedAccountId: selectedAccount.id)
+    self.wrappedState = .shouldLoadList(
+      paymentGroups: paymentGroups,
+      currency: selectedAccount.currency,
+      selectedAccountId: selectedAccount.id,
+      isDemoMode: state.isDemoMode
+    )
   }
 }

@@ -18,6 +18,7 @@ struct PaymentArchiveStateWrapperTests {
     currency: .eur,
     useBiometry: false
   )
+  private let isDemoMode = false
   private let payments = [
     Payment(accountId: "1", amountMinorUnits: 120, category: .groceries),
     Payment(accountId: "2", amountMinorUnits: 240, category: .groceries),
@@ -89,11 +90,12 @@ struct PaymentArchiveStateWrapperTests {
       .init(
         selectedAccountId: accountId,
         accounts: [accountId: account],
-        payments: [:]
+        payments: [:],
+        isDemoMode: isDemoMode
       ))
     
     await expectDidChange(in: changeTrackerStream)
-    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: [], currency: currency, selectedAccountId: accountId))
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: [], currency: currency, selectedAccountId: accountId, isDemoMode: isDemoMode))
   }
   
   @MainActor
@@ -114,14 +116,15 @@ struct PaymentArchiveStateWrapperTests {
       .init(
         selectedAccountId: accountId,
         accounts: [accountId: account],
-        payments: [accountId: payments]
+        payments: [accountId: payments],
+        isDemoMode: isDemoMode
       ))
     
     await expectDidChange(in: changeTrackerStream)
     
     let paymentGroups: [PaymentGroup] = await PaymentArchiveGroupBuilder().groupPayments(using: payments, currency: currency)
     
-    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: currency, selectedAccountId: accountId))
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: currency, selectedAccountId: accountId, isDemoMode: isDemoMode))
   }
   
   @MainActor
@@ -148,7 +151,7 @@ struct PaymentArchiveStateWrapperTests {
         currency: currency
       )
     
-    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: currency, selectedAccountId: accountId))
+    #expect(wrapper.wrappedState == .shouldLoadList(paymentGroups: paymentGroups, currency: currency, selectedAccountId: accountId, isDemoMode: isDemoMode))
   }
   
   @MainActor

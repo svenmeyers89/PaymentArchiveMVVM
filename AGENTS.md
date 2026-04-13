@@ -9,8 +9,7 @@ This file defines the default behavior contract for AI coding agents working in 
 
 ## Project orientation
 - Read [Project Guide](Docs/ProjectGuide.md) before making any changes and obey the related guidelines.
-- [Project Guide](Docs/ProjectGuide.md) is under consturction. Ignore sections whose titles contain "TBD".
-- Preserve the existing architecture and file & module structure.
+- Preserve the existing architecture and file and module structure.
 - Prefer extending existing components over creating parallel patterns.
 
 ## Core engineering rules
@@ -18,16 +17,13 @@ This file defines the default behavior contract for AI coding agents working in 
 - Avoid unrelated refactors.
 - Prefer readable, explicit code over clever code.
 - Never force-unwrap unless there is a documented invariant.
-- Keep async code structured and cancellation-aware.
-- Always use Swift concurrency concepts; avoid Combine and other frameworks for concurrent tasks.
-- Prioritize Observation framework, don't use pre-iOS17 concepts such as @StateObject, @EnvironmentObject, etc.
+- Conform to concurrency and async rules defined in [Project Guide](Docs/ProjectGuide.md).
 
 ## Swift / SwiftUI conventions
-- Follow general Swift and Apple guidelines for function, property, class and unit test naming.
-- Follow general Swift and Apple guidelines for formatting.
+- Follow general Swift guidelines for function, property, class, and unit test naming.
+- Follow general Swift guidelines for formatting.
+- Conform to high-level architecture patterns defined in [Project Guide](Docs/ProjectGuide.md).
 - Favor value semantics and immutability where practical.
-- Keep views focused on presentation; move logic to view models/services.
-- Avoid putting persistence or networking logic directly in SwiftUI views.
 
 ## File and module conventions
 - Follow existing folder structure and file naming patterns.
@@ -36,7 +32,7 @@ This file defines the default behavior contract for AI coding agents working in 
 - Add or update tests when behavior changes.
 - Prefer deterministic tests over time-dependent or flaky assertions.
 - Keep unit tests near existing test style and naming conventions.
-- Prefer Testing framework to XCTests.
+- Prefer the Testing framework over XCTest.
 
 ## Validation checklist
 Before finalizing:

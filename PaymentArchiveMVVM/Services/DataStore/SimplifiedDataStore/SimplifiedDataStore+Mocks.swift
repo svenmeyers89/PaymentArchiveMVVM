@@ -9,6 +9,8 @@ import Foundation
 
 extension SimplifiedDataStore {
   static let empty = SimplifiedDataStore(accounts: [], payments: [:])
+  
+  static let demo = SimplifiedDataStore(accounts: [], payments: [:])
 
   static let singleAccountWithMultiplePayments: SimplifiedDataStore = {
     let account1Id = "1"

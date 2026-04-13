@@ -30,7 +30,7 @@ final class PaymentArchiveCategorySelector {
     self.stream = .init(value: selectedPaymentCategories)
   }
   
-  func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
+  func select(paymentCategories: Set<Payment.Category>) {
     stream.value = paymentCategories
   }
 }

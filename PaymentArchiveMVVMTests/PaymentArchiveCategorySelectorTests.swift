@@ -53,7 +53,7 @@ struct PaymentArchiveCategorySelectorTests {
     categorySelector: PaymentArchiveCategorySelector
   ) async throws {
     try await Task.sleep(nanoseconds: 50_000_000)
-    await categorySelector.didConfirmSelection(paymentCategories: categories)
+    await categorySelector.select(paymentCategories: categories)
   }
   
   @MainActor
@@ -72,18 +72,18 @@ struct PaymentArchiveCategorySelectorTests {
     ]
     
     // Update before making iterator
-    categorySelector.didConfirmSelection(paymentCategories: updates[0])
+    categorySelector.select(paymentCategories: updates[0])
     
     var iterator = categorySelector.selectionStream.makeAsyncIterator()
     
     let value = await iterator.next()
     #expect(value == .some(updates[0]))
     
-    categorySelector.didConfirmSelection(paymentCategories: updates[1])
+    categorySelector.select(paymentCategories: updates[1])
     let nextValue = await iterator.next()
     #expect(nextValue == .some(updates[1]))
     
-    categorySelector.didConfirmSelection(paymentCategories: updates[2])
+    categorySelector.select(paymentCategories: updates[2])
     let nextNextValue = await iterator.next()
     #expect(nextNextValue == .some(updates[2]))
     

@@ -13,43 +13,18 @@ struct CircleButton: View {
   let colors: Colors
   let action: () -> Void
 
-  @State private var isBouncing = false
-  @State private var isPressed = false
-  
   var body: some View {
-    Button(
-      action: {
-        withAnimation(.interpolatingSpring(stiffness: 50, damping: 5)) {
-          isBouncing.toggle()
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            isBouncing.toggle()
-            action()
-          }
-        }
-      }) {
-        ZStack {
-          buttonBackground
-            .frame(width: size, height: size)
-            .shadow(radius: 10)
-          Image(systemName: iconName)
-            .foregroundColor(colors.icon)
-            .font(.system(size: size / 2, weight: .bold))
-        }
+    BouncingButton(action: action) {
+      ZStack {
+        buttonBackground
+          .frame(width: size, height: size)
+          .shadow(radius: 10)
+        Image(systemName: iconName)
+          .foregroundColor(colors.icon)
+          .font(.system(size: size / 2, weight: .bold))
       }
-      .scaleEffect(isPressed ? 0.9 : (isBouncing ? 1.2 : 1.0)) // Bounce effect
-      .animation(.easeInOut(duration: 0.2), value: isPressed) // Smooth shrink and release
-      .animation(.easeInOut, value: isBouncing)
-      .simultaneousGesture(
-        DragGesture(minimumDistance: 0)
-          .onChanged { _ in
-            isPressed = true
-          }
-          .onEnded { _ in
-            isPressed = false
-          }
-      )
-      .disabled(isBouncing)
     }
+  }
 }
 
 extension CircleButton {

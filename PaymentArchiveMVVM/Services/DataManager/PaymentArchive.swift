@@ -15,6 +15,7 @@ final class PaymentArchive: Sendable {
     fileprivate(set) var selectedAccountId: String?
     fileprivate(set) var accounts: [String: Account]
     fileprivate(set) var payments: [String: [Payment]]
+    fileprivate(set) var isDemoMode: Bool
   }
 
   private let broadcaster: MainBroadcaster<State?> = .init(value: nil)
@@ -22,26 +23,51 @@ final class PaymentArchive: Sendable {
   var currentState: State? {
     broadcaster.value
   }
-  
+
   // Generate a stream for each new consumer
   func makeStateStream() -> AsyncStream<State?> {
     broadcaster.makeStream()
   }
 
-  private let persistanceStore: PersistenceStore
-  
-  init(persistanceStore: PersistenceStore) {
-    self.persistanceStore = persistanceStore
+  private let persistenceStore: DataStore
+  private let demoDataStoreConfiguration: DemoDataStoreConfiguration
+
+  private var activeDataStore: DataStore {
+    if currentState?.isDemoMode == true {
+      return demoDataStoreConfiguration.dataStore
+    } else {
+      return persistenceStore
+    }
   }
   
-  func loadInitialState() async throws {
-    let accounts = try await persistanceStore.loadAllAccounts()
+  init(
+    persistanceStore: DataStore,
+    demoDataStoreConfiguration: DemoDataStoreConfiguration
+  ) {
+    self.persistenceStore = persistanceStore
+    self.demoDataStoreConfiguration = demoDataStoreConfiguration
+  }
+  
+  func loadData() async throws {
+    try await loadInitialState(isDemoMode: false)
+  }
+  
+  private func loadInitialState(isDemoMode: Bool) async throws {
+     let dataStore: DataStore = {
+      if isDemoMode {
+        demoDataStoreConfiguration.dataStore
+      } else {
+        persistenceStore
+      }
+    }()
+
+    let accounts = try await dataStore.loadAllAccounts()
 
     let selectedAccount: Account? = accounts.first
 
     let accountPayments: [Payment]
     if let selectedAccount {
-      accountPayments = try await persistanceStore.loadPayments(accountId: selectedAccount.id)
+      accountPayments = try await dataStore.loadPayments(accountId: selectedAccount.id)
     } else {
       accountPayments = []
     }
@@ -56,17 +82,30 @@ final class PaymentArchive: Sendable {
     let state = PaymentArchive.State(
       selectedAccountId: selectedAccount?.id,
       accounts: Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0) }),
-      payments: payments
+      payments: payments,
+      isDemoMode: isDemoMode
     )
     broadcaster.value = state
+  }
+
+  func enterDemoMode() async throws {
+    // TODO: Add cache to do this only once!
+    try await demoDataStoreConfiguration.dataStoreSeeder.seedDemoData(into: demoDataStoreConfiguration.dataStore)
+    broadcaster.value = nil
+    try await loadInitialState(isDemoMode: true)
+  }
+
+  func exitDemoMode() async throws {
+    broadcaster.value = nil
+    try await loadInitialState(isDemoMode: false)
   }
 }
 
 extension PaymentArchive: EditPaymentDataManager {
   func save(payment: Payment) async throws {
-    try await persistanceStore.savePayment(payment)
+    try await activeDataStore.savePayment(payment)
 
-    let payments = try await persistanceStore.loadPayments(accountId: payment.accountId)
+    let payments = try await activeDataStore.loadPayments(accountId: payment.accountId)
 
     var updatedState: State? = currentState
     updatedState?.payments[payment.accountId] = payments
@@ -76,7 +115,7 @@ extension PaymentArchive: EditPaymentDataManager {
 
 extension PaymentArchive: EditAccountDataManager {
   func save(account: Account) async throws {
-    try await persistanceStore.saveAccount(account)
+    try await activeDataStore.saveAccount(account)
 
     var updatedState = currentState
     updatedState?.accounts[account.id] = account

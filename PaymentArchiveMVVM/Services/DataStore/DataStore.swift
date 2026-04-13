@@ -1,5 +1,5 @@
 //
-//  PersistenceStore.swift
+//  DataStore.swift
 //  PaymentArchiveMVVM
 //
 //  Created by Sven Majeric on 20.07.2025..
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PersistenceStore: Sendable {
+protocol DataStore: Sendable {
   // Convention: returns accounts sorted by selectedAt
   func loadAllAccounts() async throws -> [Account]
   

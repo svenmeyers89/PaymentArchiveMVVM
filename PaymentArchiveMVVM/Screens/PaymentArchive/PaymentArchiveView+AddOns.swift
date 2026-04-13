@@ -10,7 +10,8 @@ extension PaymentArchiveView {
     case listView(
       sections: [PaymentGroup],
       currency: Currency,
-      selectedAccountId: String
+      selectedAccountId: String,
+      isDemoMode: Bool
     )
     case error(String)
   }
