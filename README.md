@@ -10,3 +10,12 @@ This project is an architectural experiment focused on a stable, predictable str
 
 ## Intent
 The goal is to validate an MVVM-style flow where state is centralized, updates are consistent, and the UI can remain simple and testable.
+
+## References
+
+The `Docs` folder contains useful documents that describe the architecture:
+- [`ProjectGuide.md`](Docs/ProjectGuide.md) - provides a comprehensive set of rules; it is friendly for both users and AI agents.
+- [`DataFlow.md`](Docs/DataFlow.md) - explains the unidirectional data flow, summarizes its requirements, and provides a technical overview.
+- [`TODO.md`](Docs/TODO.md) - backlog of upcoming tasks.
+
+[`AGENTS.md`](AGENTS.md) defines general rules that help AI agents follow the architectural guidelines. These guidelines are open to further discussion and continuous improvement.
