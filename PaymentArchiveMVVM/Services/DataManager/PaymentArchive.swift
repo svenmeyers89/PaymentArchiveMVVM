@@ -19,11 +19,7 @@ final class PaymentArchive: Sendable {
 
   private let broadcaster: MainBroadcaster<State?> = .init(value: nil)
   
-  private(set) var anotherState: State?
-  
-  var currentState: State? {
-    broadcaster.value
-  }
+  private(set) var observableState: State?
 
   // Generate a stream for each new consumer
   func makeStateStream() -> AsyncStream<State?> {
@@ -34,7 +30,7 @@ final class PaymentArchive: Sendable {
   private let demoDataStoreConfiguration: DemoDataStoreConfiguration
 
   private var activeDataStore: DataStore {
-    if currentState?.isDemoMode == true {
+    if observableState?.isDemoMode == true {
       return demoDataStoreConfiguration.dataStore
     } else {
       return persistenceStore
@@ -103,7 +99,7 @@ final class PaymentArchive: Sendable {
   
   private func updateCurrentState(_ newState: State?) {
     broadcaster.value = newState
-    anotherState = newState
+    observableState = newState
   }
 }
 
@@ -113,7 +109,7 @@ extension PaymentArchive: EditPaymentDataManager {
 
     let payments = try await activeDataStore.loadPayments(accountId: payment.accountId)
 
-    var updatedState: State? = currentState
+    var updatedState: State? = observableState
     updatedState?.payments[payment.accountId] = payments
     updateCurrentState(updatedState)
   }
@@ -123,7 +119,7 @@ extension PaymentArchive: EditAccountDataManager {
   func save(account: Account) async throws {
     try await activeDataStore.saveAccount(account)
 
-    var updatedState = currentState
+    var updatedState = observableState
     updatedState?.accounts[account.id] = account
     if updatedState?.accounts.count == 1 {
       updatedState?.selectedAccountId = account.id

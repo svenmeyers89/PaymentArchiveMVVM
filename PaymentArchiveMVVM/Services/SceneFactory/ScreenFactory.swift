@@ -33,7 +33,7 @@ struct ScreenFactory {
   func buildEditPaymentScreen(useCase: EditPaymentUseCase) -> EditPaymentView {
     let viewModel = EditPaymentViewModel(
       useCase: useCase,
-      currency: paymentArchive.currentState!.selectedAccount!.currency,
+      currency: paymentArchive.observableState!.selectedAccount!.currency,
       categories: Payment.Category.allCases,
       dataManager: paymentArchive
     )
