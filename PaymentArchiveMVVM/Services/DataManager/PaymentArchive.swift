@@ -17,14 +17,7 @@ final class PaymentArchive: Sendable {
     fileprivate(set) var isDemoMode: Bool
   }
 
-  private let broadcaster: MainBroadcaster<State?> = .init(value: nil)
-  
   private(set) var observableState: State?
-
-  // Generate a stream for each new consumer
-  func makeStateStream() -> AsyncStream<State?> {
-    broadcaster.makeStream()
-  }
 
   private let persistenceStore: DataStore
   private let demoDataStoreConfiguration: DemoDataStoreConfiguration
@@ -98,7 +91,6 @@ final class PaymentArchive: Sendable {
   }
   
   private func updateCurrentState(_ newState: State?) {
-    broadcaster.value = newState
     observableState = newState
   }
 }

@@ -8,43 +8,34 @@
 import Observation
 
 @MainActor @Observable
-final class PaymentArchiveCategorySelector2 {
-  let allPaymentCategories: [Payment.Category]
-  private(set) var selectedCategories: Set<Payment.Category>
-  
-  init(allPaymentCategories: [Payment.Category],
-       selectedCategories: Set<Payment.Category>) {
-    self.allPaymentCategories = allPaymentCategories
-    self.selectedCategories = selectedCategories
-  }
-  
-  func select(paymentCategories: Set<Payment.Category>) {
-    selectedCategories = paymentCategories
-  }
-}
-
-@MainActor @Observable
-final class PaymentArchiveViewModel2 {
+final class PaymentArchiveViewModel {
   private let paymentArchive: PaymentArchive
-  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector2
+  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
   
   private let paymentGroupBuilder: PaymentArchiveGroupBuilder = .init()
   private let defaultPaymentCategorySelection: [Payment.Category] = Payment.Category.allCases
   
   private var errorMessage: String?
   
-  private(set) var contentState: PaymentArchiveView.ContentType
+  private(set) var contentType: PaymentArchiveView.ContentType
   
-  init(
-    paymentArchive: PaymentArchive,
-    selectedCategories: Set<Payment.Category>
-  ) {
+  var allPaymentCategories: [Payment.Category] {
+    paymentArchiveCategorySelector.allPaymentCategories
+  }
+  
+  var selectedPaymentCategories: Set<Payment.Category> {
+    paymentArchiveCategorySelector.selectedCategories
+  }
+  
+  init(paymentArchive: PaymentArchive) {
     self.paymentArchive = paymentArchive
-    self.paymentArchiveCategorySelector = PaymentArchiveCategorySelector2(
+    self.paymentArchiveCategorySelector = PaymentArchiveCategorySelector(
       allPaymentCategories: defaultPaymentCategorySelection,
       selectedCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
     )
-    contentState = .loading
+    contentType = .loading
+    
+    observe()
   }
   
   func loadContent() async {
@@ -101,6 +92,8 @@ final class PaymentArchiveViewModel2 {
           selectedPaymentCategories: self.paymentArchiveCategorySelector.selectedCategories,
           errorMessage: self.errorMessage
         )
+        
+        await self.observe()
       }
     }
   }
@@ -111,12 +104,12 @@ final class PaymentArchiveViewModel2 {
     errorMessage: String?
   ) async {
     guard let state else {
-      self.contentState = .loading
+      self.contentType = .loading
       return
     }
     
     guard let selectedAccount = state.selectedAccount else {
-      self.contentState = .onboarding
+      self.contentType = .onboarding
       return
     }
     
@@ -124,97 +117,11 @@ final class PaymentArchiveViewModel2 {
     let filteredPayments: [Payment] = allPayments.filter { selectedPaymentCategories.contains($0.category) }
     let paymentGroups = await paymentGroupBuilder.groupPayments(using: filteredPayments, currency: selectedAccount.currency)
     
-    self.contentState = .listView(
+    self.contentType = .listView(
       sections: paymentGroups,
       currency: selectedAccount.currency,
       selectedAccountId: selectedAccount.id,
       isDemoMode: state.isDemoMode
     )
-  }
-}
-
-@MainActor @Observable
-final class PaymentArchiveViewModel {
-  var contentType: PaymentArchiveView.ContentType {
-    if let errorMessage {
-      return .error(errorMessage)
-    }
-    
-    let state = stateWrapper.wrappedState
-    
-    switch state {
-    case .missingInitialState:
-      return .loading
-    case .shouldOnboard:
-      return .onboarding
-    case let .shouldLoadList(paymentGroups, currency, selectedAccountId, isDemoMode):
-      return .listView(sections: paymentGroups, currency: currency, selectedAccountId: selectedAccountId, isDemoMode: isDemoMode)
-    }
-  }
-  
-  var allPaymentCategories: [Payment.Category] {
-    paymentArchiveCategorySelector.allPaymentCategories
-  }
-  
-  var selectedPaymentCategories: Set<Payment.Category> {
-    paymentArchiveCategorySelector.currentlySelectedPaymentCategories
-  }
-  
-  private var errorMessage: String?
-
-  private let stateWrapper: PaymentArchiveStateWrapper
-  private let paymentArchive: PaymentArchive
-  private let paymentArchiveCategorySelector: PaymentArchiveCategorySelector
-  
-  private let defaultPaymentCategorySelection: [Payment.Category] = Payment.Category.allCases
-
-  init(paymentArchive: PaymentArchive) {
-    self.paymentArchive = paymentArchive
-    self.paymentArchiveCategorySelector = .init(
-      allPaymentCategories: defaultPaymentCategorySelection,
-      selectedPaymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
-    )
-    self.stateWrapper = .init(
-      paymentArchiveStateStream: paymentArchive.makeStateStream(),
-      selectedPaymentCategoriesStream: paymentArchiveCategorySelector.selectionStream,
-      paymentGroupBuilder: PaymentArchiveGroupBuilder()
-    )
-  }
-
-  func loadContent() async {
-    do {
-      try await paymentArchive.loadData()
-      errorMessage = nil
-    } catch {
-      errorMessage = error.localizedDescription
-    }
-  }
-  
-  func didConfirmSelection(paymentCategories: Set<Payment.Category>) {
-    paymentArchiveCategorySelector.select(paymentCategories: paymentCategories)
-  }
-
-  func enterDemoMode() async {
-    do {
-      try await paymentArchive.enterDemoMode()
-      paymentArchiveCategorySelector.select(
-        paymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
-      )
-      errorMessage = nil
-    } catch {
-      errorMessage = error.localizedDescription
-    }
-  }
-
-  func exitDemoMode() async {
-    do {
-      try await paymentArchive.exitDemoMode()
-      paymentArchiveCategorySelector.select(
-        paymentCategories: Set<Payment.Category>(defaultPaymentCategorySelection)
-      )
-      errorMessage = nil
-    } catch {
-      errorMessage = error.localizedDescription
-    }
   }
 }
