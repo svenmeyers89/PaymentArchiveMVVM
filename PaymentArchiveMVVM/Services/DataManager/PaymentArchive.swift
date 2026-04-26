@@ -8,7 +8,7 @@
 import AsyncOperators
 import Foundation
 
-@MainActor
+@MainActor @Observable
 final class PaymentArchive: Sendable {
   struct State: Equatable, Sendable {
     fileprivate(set) var selectedAccountId: String?
@@ -18,6 +18,8 @@ final class PaymentArchive: Sendable {
   }
 
   private let broadcaster: MainBroadcaster<State?> = .init(value: nil)
+  
+  private(set) var anotherState: State?
   
   var currentState: State? {
     broadcaster.value
@@ -84,19 +86,24 @@ final class PaymentArchive: Sendable {
       payments: payments,
       isDemoMode: isDemoMode
     )
-    broadcaster.value = state
+    updateCurrentState(state)
   }
 
   func enterDemoMode() async throws {
     // TODO: Add cache to do this only once!
     try await demoDataStoreConfiguration.dataStoreSeeder.seedDemoData(into: demoDataStoreConfiguration.dataStore)
-    broadcaster.value = nil
+    updateCurrentState(nil)
     try await loadInitialState(isDemoMode: true)
   }
 
   func exitDemoMode() async throws {
-    broadcaster.value = nil
+    updateCurrentState(nil)
     try await loadInitialState(isDemoMode: false)
+  }
+  
+  private func updateCurrentState(_ newState: State?) {
+    broadcaster.value = newState
+    anotherState = newState
   }
 }
 
@@ -108,7 +115,7 @@ extension PaymentArchive: EditPaymentDataManager {
 
     var updatedState: State? = currentState
     updatedState?.payments[payment.accountId] = payments
-    broadcaster.value = updatedState
+    updateCurrentState(updatedState)
   }
 }
 
@@ -121,6 +128,6 @@ extension PaymentArchive: EditAccountDataManager {
     if updatedState?.accounts.count == 1 {
       updatedState?.selectedAccountId = account.id
     }
-    broadcaster.value = updatedState
+    updateCurrentState(updatedState)
   }
 }
